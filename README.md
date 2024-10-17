@@ -1,5 +1,7 @@
 # Torrust Bencode2Json
 
+[![Testing](https://github.com/torrust/bencode2json/actions/workflows/testing.yaml/badge.svg)](https://github.com/torrust/bencode2json/actions/workflows/testing.yaml)
+
 A lib and console command to convert from bencoded data to JSON format.
 
 Output is similar to: <https://github.com/Chocobo1/bencode_online>. When a bencoded string (byte string) contains only valid UTF-8 chars, those chars will print to the output. If the string contains non valid UTF-8 chars, them the string will be printed in hexadecimal. For example:

@@ -294,11 +294,6 @@ impl<R: Read> BencodeParser<R> {
     /// # Errors
     ///
     /// Will return an error if the writer can't write to the output.
-    ///
-    /// # Panics
-    ///
-    /// Will panic if the end of bencoded value (list or dictionary) was not
-    /// expected.
     pub fn end_list_or_dict<W: Writer>(&mut self, writer: &mut W) -> Result<(), error::Error> {
         match self.stack.peek() {
             State::ExpectingFirstListItemOrEnd | State::ExpectingNextListItem => {

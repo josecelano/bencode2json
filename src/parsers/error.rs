@@ -11,70 +11,110 @@ use crate::rw;
 
 use super::BencodeType;
 
+/// Errors that can occur while parsing a bencoded value.
 #[derive(Debug, Error)]
 pub enum Error {
+    /// I/O error.
     #[error("I/O error: {0}")]
     Io(#[from] io::Error),
 
+    /// R/W error.
     #[error("R/W error: {0}")]
     Rw(#[from] rw::error::Error),
 
+    /// Read byte after peeking does match peeked byte.
+    ///
+    /// The main parser peeks one byte ahead to know what kind of bencoded value
+    /// is being parsed. If the byte read after peeking does not match the
+    /// peeked byte, it means the input is being consumed somewhere else.
     #[error("Read byte after peeking does match peeked byte; {0}; {1}")]
     ReadByteAfterPeekingDoesMatchPeekedByte(ReadContext, WriteContext),
 
+    /// Unrecognized first byte for new bencoded value.
+    ///
+    /// The main parser peeks one byte ahead to know what kind of bencoded value
+    /// is being parsed. This error is raised when the peeked byte is not a
+    /// valid first byte for a bencoded value.
     #[error("Unrecognized first byte for new bencoded value; {0}; {1}")]
     UnrecognizedFirstBencodeValueByte(ReadContext, WriteContext),
 
     // Integers
+    /// Unexpected byte parsing integer.
+    ///
+    /// The main parser parses integers by reading bytes until it finds the
+    /// end of the integer. This error is raised when the byte read is not a
+    /// valid byte for an integer bencoded value.
     #[error("Unexpected byte parsing integer; {0}; {1}")]
     UnexpectedByteParsingInteger(ReadContext, WriteContext),
 
+    /// Unexpected end of input parsing integer.
+    ///
+    /// The input ends before the integer ends.
     #[error("Unexpected end of input parsing integer; {0}; {1}")]
     UnexpectedEndOfInputParsingInteger(ReadContext, WriteContext),
 
+    /// Leading zeros in integers are not allowed, for example b'i00e'.
     #[error("Leading zeros in integers are not allowed, for example b'i00e'; {0}; {1}")]
     LeadingZerosInIntegersNotAllowed(ReadContext, WriteContext),
 
     // Strings
+    /// Invalid string length byte, expected a digit.
+    ///
+    /// The string parser found an invalid byte for the string length. The
+    /// length can only be made of digits (0-9).
     #[error("Invalid string length byte, expected a digit; {0}; {1}")]
     InvalidStringLengthByte(ReadContext, WriteContext),
 
+    /// Unexpected end of input parsing string length.
+    ///
+    /// The input ends before the string length ends.
     #[error("Unexpected end of input parsing string length; {0}; {1}")]
     UnexpectedEndOfInputParsingStringLength(ReadContext, WriteContext),
 
+    /// Unexpected end of input parsing string value.
+    ///
+    /// The input ends before the string value ends.
     #[error("Unexpected end of input parsing string value; {0}; {1}")]
     UnexpectedEndOfInputParsingStringValue(ReadContext, WriteContext),
 
     // Lists
+    /// Unexpected end of input parsing list. Expecting first list item or list end.
     #[error(
         "Unexpected end of input parsing list. Expecting first list item or list end; {0}; {1}"
     )]
     UnexpectedEndOfInputExpectingFirstListItemOrEnd(ReadContext, WriteContext),
 
+    /// Unexpected end of input parsing list. Expecting next list item.
     #[error("Unexpected end of input parsing list. Expecting next list item; {0}; {1}")]
     UnexpectedEndOfInputExpectingNextListItem(ReadContext, WriteContext),
 
     // Dictionaries
+    /// Unexpected end of input parsing dictionary. Expecting first dictionary field or dictionary end.
     #[error("Unexpected end of input parsing dictionary. Expecting first dictionary field or dictionary end; {0}; {1}")]
     UnexpectedEndOfInputExpectingFirstDictFieldOrEnd(ReadContext, WriteContext),
 
+    /// Unexpected end of input parsing dictionary. Expecting dictionary field value.
     #[error(
         "Unexpected end of input parsing dictionary. Expecting dictionary field value; {0}; {1}"
     )]
     UnexpectedEndOfInputExpectingDictFieldValue(ReadContext, WriteContext),
 
+    /// Unexpected end of input parsing dictionary. Expecting dictionary field key or end.
     #[error(
         "Unexpected end of input parsing dictionary. Expecting dictionary field key or end; {0}; {1}"
     )]
     UnexpectedEndOfInputExpectingDictFieldKeyOrEnd(ReadContext, WriteContext),
 
+    /// Unexpected end of dictionary. Premature end of dictionary.
     #[error("Unexpected end of dictionary. Premature end of dictionary; {0}; {1}")]
     PrematureEndOfDict(ReadContext, WriteContext),
 
+    /// Expected string for dictionary field key.
     #[error("Expected string for dictionary field key, but got: {0}, {1}")]
     ExpectedStringForDictKeyGot(BencodeType, ReadContext, WriteContext),
 
     // List and dictionaries
+    /// Unexpected end of list or dict. No matching start for the list or dict end.
     #[error(
         "Unexpected end of list or dict. No matching start for the list or dict end: {0}, {1}"
     )]

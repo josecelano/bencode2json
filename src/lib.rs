@@ -1,8 +1,39 @@
 //! This lib contains functions to convert bencoded bytes into a JSON string.
 //!
-//! There are high-level functions for common purposes that call the lower level
-//! parser. You can use the low-lever parser if the high-level wrappers are not
-//! suitable for your needs.
+//! Bencode is a simple encoding format that is used to encode arbitrary
+//! data structures. It is commonly used in the context of torrent files,
+//! where the data structures are used to describe the contents of the torrent
+//! file.
+//!
+//! To learn more about bencode, you can refer to the following resources:
+//!
+//! - <https://en.wikipedia.org/wiki/Bencode>
+//! - <https://www.bittorrent.org/beps/bep_0003.html>
+//!
+//! Thi lib has high-level functions for common purposes that call the lower
+//! level parser. You can use the low-lever parser if the high-level wrappers
+//! are not suitable for your needs.
+//!
+//! The most straightforward way to use this lib is to use the `try_bencode_to_json`
+//! function:
+//!
+//! ```rust
+//! use torrust_bencode2json::{try_bencode_to_json};
+//!
+//! let result = try_bencode_to_json(b"d4:spam4:eggse").unwrap();
+//!
+//! assert_eq!(result, r#"{"spam":"eggs"}"#);
+//! ```
+//!
+//! The primary goal of this lib is to provide a simple and easy-to-use API for
+//! converting bencoded data into JSON. It's also designed to be flexible and
+//! efficient, making it suitable for a wide range of use cases.
+//!
+//! A design requirement is to be able to parse bencoded data without building
+//! an in-memory representation of the whole bencoded data structure.
+//!
+//! > __NOTICE__: In the context of this lib, parser is a function that takes an input
+//! > containing bencoded data and produces a JSON output (raw bytes or UTF-8 string).
 use parsers::{error::Error, BencodeParser};
 
 pub mod parsers;

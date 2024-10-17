@@ -2,11 +2,14 @@
 //! current parsing state.
 use std::fmt::Display;
 
-/// Stack with containing states for nested Bencoded values.
+/// Stack containing states for nested Bencoded values.
 ///
-/// The stat has an immutable initial state.
+/// The stack has an immutable initial state.
+///
+/// > NOTICE!: It's not allowed to pop or change the initial state.
 #[derive(Debug)]
 pub struct Stack {
+    /// The stack of states.
     states: Vec<State>,
 }
 
@@ -17,21 +20,36 @@ pub struct Stack {
 ///
 /// States are displayed with a short name using only one letter:
 ///
-/// I, L, M, D, E, F
+/// `I`, `L`, `M`, `D`, `E`, `F`
 ///
-/// This comes from the original implementation.
+/// This comes from the original implementation in C.
 #[derive(Debug, PartialEq, Clone)]
 pub enum State {
+    /// The initial state.
+    /// /// The sort display name for the state is L.
     Initial, // I
 
     // States while parsing lists
-    ExpectingFirstListItemOrEnd, // L
-    ExpectingNextListItem,       // M
+    /// Expecting the first list item or the end of the list.
+    /// The sort display name for the state is L.
+    ExpectingFirstListItemOrEnd,
+
+    /// Expecting the next list item. List contains at least one item.
+    /// The sort display name for the state is M.
+    ExpectingNextListItem,
 
     // States while parsing dictionaries
-    ExpectingFirstDictFieldOrEnd, // D
-    ExpectingDictFieldValue,      // E
-    ExpectingDictFieldKeyOrEnd,   // F
+    /// Expecting the first dict field or the end of the dict.
+    /// The sort display name for the state is D.
+    ExpectingFirstDictFieldOrEnd,
+
+    /// Expecting the dict field value.
+    /// The sort display name for the state is E.
+    ExpectingDictFieldValue,
+
+    /// Expecting the dict field key or the end of the dict.
+    /// The sort display name for the state is F.
+    ExpectingDictFieldKeyOrEnd,
 }
 
 impl Display for State {

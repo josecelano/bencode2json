@@ -1,6 +1,6 @@
 //! Parsers, including the main parser and the parsers for the basic types
 //! (integer and string).
-//! 
+//!
 //! ``BencodeParser`` is the main parser. It is generic over the type of the
 //! input buffer.
 pub mod error;

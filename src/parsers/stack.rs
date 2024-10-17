@@ -8,7 +8,7 @@ use std::fmt::Display;
 ///
 /// > NOTICE!: It's not allowed to pop or change the initial state.
 #[derive(Debug)]
-pub struct Stack {
+pub(crate) struct Stack {
     /// The stack of states.
     states: Vec<State>,
 }

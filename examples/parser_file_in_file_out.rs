@@ -11,7 +11,7 @@ use std::{
 };
 
 use clap::{Arg, Command};
-use torrust_bencode2json::parsers::BencodeParser;
+use bencode2json::parsers::BencodeParser;
 
 fn main() {
     let matches = Command::new("parser_file_in_file_out")

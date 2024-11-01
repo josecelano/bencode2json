@@ -92,13 +92,13 @@ echo "d3:foold3:bari42eeee" | cargo run | jq
 You can install the binary with:
 
 ```console
-cargo install torrust-bencode2json
+cargo install bencode2json
 ```
 
 Or by using [cargo-binstall](https://github.com/cargo-bins/cargo-binstall):
 
 ```console
-cargo binstall torrust-bencode2json
+cargo binstall bencode2json
 ```
 
 ## Library
@@ -106,7 +106,7 @@ cargo binstall torrust-bencode2json
 You can install the library with:
 
 ```console
-cargo add torrust-bencode2json
+cargo add bencode2json
 ```
 
 There two ways of using the library:
@@ -117,7 +117,7 @@ There two ways of using the library:
 Example using the high-level parser wrappers:
 
 ```rust
-use torrust_bencode2json::{try_bencode_to_json};
+use bencode2json::{try_bencode_to_json};
 
 let result = try_bencode_to_json(b"d4:spam4:eggse").unwrap();
 
@@ -127,7 +127,7 @@ assert_eq!(result, r#"{"spam":"eggs"}"#);
 Example using the low-level parser:
 
 ```rust
-use torrust_bencode2json::parsers::{BencodeParser};
+use bencode2json::parsers::{BencodeParser};
 
 let mut output = String::new();
 

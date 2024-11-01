@@ -10,8 +10,8 @@ use std::{
     io::{Read, Write},
 };
 
-use clap::{Arg, Command};
 use bencode2json::parsers::BencodeParser;
+use clap::{Arg, Command};
 
 fn main() {
     let matches = Command::new("parser_file_in_file_out")

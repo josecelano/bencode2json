@@ -229,7 +229,7 @@ Some files include explicit copyright notices and/or license notices.
 
 ### Legacy Exception
 
-For prosperity, versions of Torrust Tracker that are older than five years are automatically granted the [MIT-0][MIT_0] license in addition to the existing [LGPL-3.0-only][LGPL_3_0] license.
+For prosperity, versions of Torrust Bencode2Json that are older than five years are automatically granted the [MIT-0][MIT_0] license in addition to the existing [LGPL-3.0-only][LGPL_3_0] license.
 
 [LGPL_3_0]: ./LICENSE
 [MIT_0]: ./docs/licenses/LICENSE-MIT_0

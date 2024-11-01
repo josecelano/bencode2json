@@ -7,7 +7,7 @@ mod it_should {
 
     #[test]
     fn read_from_stdin_and_write_to_stdout() {
-        let mut cmd = Command::cargo_bin("torrust-bencode2json").unwrap();
+        let mut cmd = Command::cargo_bin("bencode2json").unwrap();
         cmd.write_stdin("4:spam")
             .assert()
             .success()
@@ -20,7 +20,7 @@ mod it_should {
 
         let output_file = temp_dir.path().join("output.json");
 
-        let mut cmd = Command::cargo_bin("torrust-bencode2json").unwrap();
+        let mut cmd = Command::cargo_bin("bencode2json").unwrap();
 
         cmd.arg("-i")
             .arg("tests/fixtures/sample.bencode")
@@ -40,7 +40,7 @@ mod it_should {
 
         let output_file = temp_dir.path().join("new_file.json");
 
-        let mut cmd = Command::cargo_bin("torrust-bencode2json").unwrap();
+        let mut cmd = Command::cargo_bin("bencode2json").unwrap();
 
         cmd.arg("-i")
             .arg("tests/fixtures/sample.bencode")
@@ -56,7 +56,7 @@ mod it_should {
 
     #[test]
     fn fail_when_the_bencoded_input_is_invalid() {
-        let mut cmd = Command::cargo_bin("torrust-bencode2json").unwrap();
+        let mut cmd = Command::cargo_bin("bencode2json").unwrap();
         cmd.write_stdin("a")
             .assert()
             .failure()
@@ -69,7 +69,7 @@ mod it_should {
 
         let output_file = temp_dir.path().join("output.json");
 
-        let mut cmd = Command::cargo_bin("torrust-bencode2json").unwrap();
+        let mut cmd = Command::cargo_bin("bencode2json").unwrap();
 
         cmd.arg("-i")
             .arg("non_existing_file.bencode")
@@ -85,7 +85,7 @@ mod it_should {
 
         let output_file = temp_dir.path().join("non_existing_dir/new_file.json");
 
-        let mut cmd = Command::cargo_bin("torrust-bencode2json").unwrap();
+        let mut cmd = Command::cargo_bin("bencode2json").unwrap();
 
         cmd.arg("-i")
             .arg("tests/fixtures/sample.bencode")

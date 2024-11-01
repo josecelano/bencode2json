@@ -7,7 +7,7 @@
 //! It prints "spam".
 use std::io;
 
-use torrust_bencode2json::parsers::BencodeParser;
+use bencode2json::parsers::BencodeParser;
 
 fn main() {
     let input = Box::new(io::stdin());

@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-name = "torrust-bencode2json"
+name = "bencode2json"
 version = "0.1.0"
 
 [workspace]

@@ -13,17 +13,17 @@
 //! ```text
 //! cargo run -- -i ./tests/fixtures/sample.bencode -o output.json
 //! ```
+use bencode2json::parsers::BencodeParser;
 use clap::{Arg, Command};
 use std::fs::File;
 use std::io::{self, Read, Write};
-use torrust_bencode2json::parsers::BencodeParser;
 
 fn main() {
     run();
 }
 
 fn run() {
-    let matches = Command::new("torrust-bencode2json")
+    let matches = Command::new("bencode2json")
         .version("0.1.0")
         .author("Torrust Organization")
         .about("Converts Bencode to JSON")

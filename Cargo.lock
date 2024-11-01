@@ -83,6 +83,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ace50bade8e6234aa140d9a2f552bbee1db4d353f69b8217bc503490fc1a9f26"
 
 [[package]]
+name = "bencode2json"
+version = "0.1.0"
+dependencies = [
+ "assert_cmd",
+ "clap",
+ "derive_more",
+ "hex",
+ "predicates",
+ "ringbuffer",
+ "serde_json",
+ "tempfile",
+ "thiserror",
+]
+
+[[package]]
 name = "bitflags"
 version = "2.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -460,21 +475,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "torrust-bencode2json"
-version = "0.1.0"
-dependencies = [
- "assert_cmd",
- "clap",
- "derive_more",
- "hex",
- "predicates",
- "ringbuffer",
- "serde_json",
- "tempfile",
- "thiserror",
 ]
 
 [[package]]

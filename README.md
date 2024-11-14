@@ -1,6 +1,6 @@
 # Torrust Bencode2Json
 
-[![Testing](https://github.com/torrust/bencode2json/actions/workflows/testing.yaml/badge.svg)](https://github.com/torrust/bencode2json/actions/workflows/testing.yaml)
+[![Testing](https://github.com/torrust/bencode2json/actions/workflows/testing.yaml/badge.svg)](https://github.com/torrust/bencode2json/actions/workflows/testing.yaml) [![codecov](https://codecov.io/gh/torrust/bencode2json/branch/develop/graph/badge.svg?token=G5IK5HV2EW)](https://codecov.io/gh/torrust/bencode2json)
 
 A lib and console command to convert from bencoded data to JSON format.
 

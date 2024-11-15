@@ -18,6 +18,7 @@ binstall
 bobe
 bobee
 Chocobo
+codecov
 ddei
 Deque
 dlei

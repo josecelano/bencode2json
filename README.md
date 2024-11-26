@@ -1,6 +1,6 @@
-# Bencode2Json
+# Torrust Bencode2Json
 
-[![Testing](https://github.com/torrust/bencode2json/actions/workflows/testing.yaml/badge.svg)](https://github.com/torrust/bencode2json/actions/workflows/testing.yaml) [![codecov](https://codecov.io/gh/torrust/bencode2json/branch/develop/graph/badge.svg?token=G5IK5HV2EW)](https://codecov.io/gh/torrust/bencode2json)
+[![Testing](https://github.com/torrust/bencode2json/actions/workflows/testing.yaml/badge.svg)](https://github.com/torrust/bencode2json/actions/workflows/testing.yaml)
 
 A lib and console command to convert from bencoded data to JSON format.
 
@@ -32,19 +32,19 @@ Run the binary with stdin and stdout (UTF-8):
 
 ```console
 echo "4:spam" | cargo run
-"spam"
+"<string>spam</string>"
 ```
 
 Run the binary with stdin and stdout (non UTF-8):
 
 ```console
 printf "d3:bar2:\xFF\xFEe" | cargo run
-{"bar":"<hex>fffe</hex>"}
+{"<string>bar</string>":"<hex>fffe</hex>"}
 ```
 
 ```console
 printf "d2:\xFF\xFE3:bare" | cargo run
-{"<hex>fffe</hex>":"bar"}
+{"<hex>fffe</hex>":"<string>bar</string>"}
 ```
 
 > NOTICE: We need two escape the two bytes `FF` and `FE` with `\x` inside the string.
@@ -53,7 +53,7 @@ More examples:
 
 ```console
 cat ./tests/fixtures/sample.bencode | cargo run
-["spam"]
+["<string>spam</string>"]
 ```
 
 More examples with invalid Bencode:
@@ -81,9 +81,9 @@ echo "d3:foold3:bari42eeee" | cargo run | jq
 
 ```json
 {
-  "foo": [
+  "<string>foo</string>": [
     {
-      "bar": 42
+      "<string>bar</string>": 42
     }
   ]
 }
@@ -121,7 +121,7 @@ use bencode2json::{try_bencode_to_json};
 
 let result = try_bencode_to_json(b"d4:spam4:eggse").unwrap();
 
-assert_eq!(result, r#"{"spam":"eggs"}"#);
+assert_eq!(result, r#"{"<string>spam</string>":"<string>eggs</<string>string>"}"#);
 ```
 
 Example using the low-level parser:
@@ -137,7 +137,7 @@ parser
   .write_str(&mut output)
   .expect("Bencode to JSON conversion failed");
 
-println!("{output}"); // It prints the JSON string: "spam"
+println!("{output}"); // It prints the JSON string: "<string>spam</string>"
 ```
 
 More [examples](./examples/).
@@ -229,7 +229,7 @@ Some files include explicit copyright notices and/or license notices.
 
 ### Legacy Exception
 
-For prosperity, versions of Bencode2Json that are older than five years are automatically granted the [MIT-0][MIT_0] license in addition to the existing [LGPL-3.0-only][LGPL_3_0] license.
+For prosperity, versions of Torrust Bencode2Json that are older than five years are automatically granted the [MIT-0][MIT_0] license in addition to the existing [LGPL-3.0-only][LGPL_3_0] license.
 
 [LGPL_3_0]: ./LICENSE
 [MIT_0]: ./docs/licenses/LICENSE-MIT_0

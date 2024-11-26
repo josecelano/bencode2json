@@ -109,7 +109,7 @@ pub(crate) fn generate_n_nested_empty_json_objects(n: usize) -> String {
     }
 
     let mut object = "{".to_string();
-    object.push_str(r#""foo":"#);
+    object.push_str(r#""<string>foo</string>":"#);
     object.push_str(&generate_n_nested_empty_json_objects(n - 1));
     object.push('}');
 
@@ -131,7 +131,7 @@ pub(crate) fn generate_n_nested_empty_json_objects(n: usize) -> String {
 ///
 /// A `Vec<u8>` containing the bencoded string.
 pub(crate) fn bencoded_string_with_repeated_byte(byte: u8, n: usize) -> Vec<u8> {
-    let string_length = b"1000000".to_vec();
+    let string_length = n.to_string().into_bytes();
     let string_value = vec![byte; n];
 
     let mut bencoded_string = Vec::new();

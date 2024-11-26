@@ -22,7 +22,7 @@
 //!
 //! let result = try_bencode_to_json(b"d4:spam4:eggse").unwrap();
 //!
-//! assert_eq!(result, r#"{"spam":"eggs"}"#);
+//! assert_eq!(result, r#"{"<string>spam</string>":"<string>eggs</string>"}"#);
 //! ```
 //!
 //! The primary goal of this lib is to provide a simple and easy-to-use API for
@@ -73,7 +73,10 @@ mod tests {
         fn when_it_succeeds() {
             let result = try_bencode_to_json(b"d4:spam4:eggse").unwrap();
 
-            assert_eq!(result, r#"{"spam":"eggs"}"#);
+            assert_eq!(
+                result,
+                r#"{"<string>spam</string>":"<string>eggs</string>"}"#
+            );
         }
 
         #[test]

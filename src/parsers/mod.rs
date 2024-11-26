@@ -658,19 +658,25 @@ mod tests {
 
         #[test]
         fn length_can_contain_leading_zeros() {
-            assert_eq!(bencode_to_json_unchecked(b"00:"), r#""""#.to_string());
+            assert_eq!(
+                bencode_to_json_unchecked(b"00:"),
+                r#""<string></string>""#.to_string()
+            );
         }
 
         #[test]
         fn empty_string() {
-            assert_eq!(bencode_to_json_unchecked(b"0:"), r#""""#.to_string());
+            assert_eq!(
+                bencode_to_json_unchecked(b"0:"),
+                r#""<string></string>""#.to_string()
+            );
         }
 
         #[test]
         fn utf8() {
             assert_eq!(
                 bencode_to_json_unchecked(b"4:spam"),
-                r#""spam""#.to_string()
+                r#""<string>spam</string>""#.to_string()
             );
         }
 
@@ -688,7 +694,7 @@ mod tests {
 
             assert_eq!(
                 bencode_to_json_unchecked(&to_bencode(&big_string)),
-                format!(r#""{big_string}""#)
+                format!(r#""<string>{big_string}</string>""#)
             );
         }
 
@@ -703,30 +709,78 @@ mod tests {
 
         #[test]
         fn ending_with_bencode_end_char() {
-            assert_eq!(bencode_to_json_unchecked(b"1:e"), r#""e""#.to_string());
+            assert_eq!(
+                bencode_to_json_unchecked(b"1:e"),
+                r#""<string>e</string>""#.to_string()
+            );
         }
 
         #[test]
         fn containing_a_reserved_char() {
-            assert_eq!(bencode_to_json_unchecked(b"1:i"), r#""i""#.to_string());
-            assert_eq!(bencode_to_json_unchecked(b"1:l"), r#""l""#.to_string());
-            assert_eq!(bencode_to_json_unchecked(b"1:d"), r#""d""#.to_string());
-            assert_eq!(bencode_to_json_unchecked(b"1:l"), r#""l""#.to_string());
-            assert_eq!(bencode_to_json_unchecked(b"1:e"), r#""e""#.to_string());
+            assert_eq!(
+                bencode_to_json_unchecked(b"1:i"),
+                r#""<string>i</string>""#.to_string()
+            );
+            assert_eq!(
+                bencode_to_json_unchecked(b"1:l"),
+                r#""<string>l</string>""#.to_string()
+            );
+            assert_eq!(
+                bencode_to_json_unchecked(b"1:d"),
+                r#""<string>d</string>""#.to_string()
+            );
+            assert_eq!(
+                bencode_to_json_unchecked(b"1:l"),
+                r#""<string>l</string>""#.to_string()
+            );
+            assert_eq!(
+                bencode_to_json_unchecked(b"1:e"),
+                r#""<string>e</string>""#.to_string()
+            );
         }
 
         #[test]
         fn containing_a_digit() {
-            assert_eq!(bencode_to_json_unchecked(b"1:0"), r#""0""#.to_string());
-            assert_eq!(bencode_to_json_unchecked(b"1:1"), r#""1""#.to_string());
-            assert_eq!(bencode_to_json_unchecked(b"1:2"), r#""2""#.to_string());
-            assert_eq!(bencode_to_json_unchecked(b"1:3"), r#""3""#.to_string());
-            assert_eq!(bencode_to_json_unchecked(b"1:4"), r#""4""#.to_string());
-            assert_eq!(bencode_to_json_unchecked(b"1:5"), r#""5""#.to_string());
-            assert_eq!(bencode_to_json_unchecked(b"1:6"), r#""6""#.to_string());
-            assert_eq!(bencode_to_json_unchecked(b"1:7"), r#""7""#.to_string());
-            assert_eq!(bencode_to_json_unchecked(b"1:8"), r#""8""#.to_string());
-            assert_eq!(bencode_to_json_unchecked(b"1:9"), r#""9""#.to_string());
+            assert_eq!(
+                bencode_to_json_unchecked(b"1:0"),
+                r#""<string>0</string>""#.to_string()
+            );
+            assert_eq!(
+                bencode_to_json_unchecked(b"1:1"),
+                r#""<string>1</string>""#.to_string()
+            );
+            assert_eq!(
+                bencode_to_json_unchecked(b"1:2"),
+                r#""<string>2</string>""#.to_string()
+            );
+            assert_eq!(
+                bencode_to_json_unchecked(b"1:3"),
+                r#""<string>3</string>""#.to_string()
+            );
+            assert_eq!(
+                bencode_to_json_unchecked(b"1:4"),
+                r#""<string>4</string>""#.to_string()
+            );
+            assert_eq!(
+                bencode_to_json_unchecked(b"1:5"),
+                r#""<string>5</string>""#.to_string()
+            );
+            assert_eq!(
+                bencode_to_json_unchecked(b"1:6"),
+                r#""<string>6</string>""#.to_string()
+            );
+            assert_eq!(
+                bencode_to_json_unchecked(b"1:7"),
+                r#""<string>7</string>""#.to_string()
+            );
+            assert_eq!(
+                bencode_to_json_unchecked(b"1:8"),
+                r#""<string>8</string>""#.to_string()
+            );
+            assert_eq!(
+                bencode_to_json_unchecked(b"1:9"),
+                r#""<string>9</string>""#.to_string()
+            );
         }
 
         mod should_escape_json {
@@ -736,7 +790,7 @@ mod tests {
             fn containing_a_double_quote() {
                 assert_eq!(
                     bencode_to_json_unchecked("1:\"".as_bytes()),
-                    r#""\"""#.to_string()
+                    r#""<string>\"</string>""#.to_string()
                 );
             }
 
@@ -744,7 +798,7 @@ mod tests {
             fn containing_backslashes() {
                 assert_eq!(
                     bencode_to_json_unchecked("1:\\".as_bytes()),
-                    r#""\\""#.to_string()
+                    r#""<string>\\</string>""#.to_string()
                 );
             }
 
@@ -752,15 +806,15 @@ mod tests {
             fn containing_control_characters() {
                 assert_eq!(
                     bencode_to_json_unchecked("1:\n".as_bytes()),
-                    r#""\n""#.to_string()
+                    r#""<string>\n</string>""#.to_string()
                 );
                 assert_eq!(
                     bencode_to_json_unchecked("1:\r".as_bytes()),
-                    r#""\r""#.to_string()
+                    r#""<string>\r</string>""#.to_string()
                 );
                 assert_eq!(
                     bencode_to_json_unchecked("1:\t".as_bytes()),
-                    r#""\t""#.to_string()
+                    r#""<string>\t</string>""#.to_string()
                 );
             }
 
@@ -768,7 +822,7 @@ mod tests {
             fn containing_unicode_characters() {
                 assert_eq!(
                     bencode_to_json_unchecked(&to_bencode("ñandú")),
-                    r#""ñandú""#.to_string()
+                    r#""<string>ñandú</string>""#.to_string()
                 );
             }
         }
@@ -852,7 +906,7 @@ mod tests {
             fn utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"l4:spame"),
-                    r#"["spam"]"#.to_string()
+                    r#"["<string>spam</string>"]"#.to_string()
                 );
             }
 
@@ -894,7 +948,7 @@ mod tests {
                 fn one_nested_list_which_contains_one_utf_8_string() {
                     assert_eq!(
                         bencode_to_json_unchecked(b"ll4:spamee"),
-                        r#"[["spam"]]"#.to_string()
+                        r#"[["<string>spam</string>"]]"#.to_string()
                     );
                 }
 
@@ -902,7 +956,7 @@ mod tests {
                 fn one_nested_list_which_contains_two_utf_8_strings() {
                     assert_eq!(
                         bencode_to_json_unchecked(b"ll5:alice3:bobee"),
-                        r#"[["alice","bob"]]"#.to_string()
+                        r#"[["<string>alice</string>","<string>bob</string>"]]"#.to_string()
                     );
                 }
 
@@ -935,7 +989,7 @@ mod tests {
                 fn with_one_field() {
                     assert_eq!(
                         bencode_to_json_unchecked(b"ld3:foo3:baree"),
-                        r#"[{"foo":"bar"}]"#.to_string()
+                        r#"[{"<string>foo</string>":"<string>bar</string>"}]"#.to_string()
                     );
                 }
 
@@ -943,7 +997,8 @@ mod tests {
                 fn with_two_fields() {
                     assert_eq!(
                         bencode_to_json_unchecked(b"ld3:bar4:spam3:fooi42eee"),
-                        r#"[{"bar":"spam","foo":42}]"#.to_string()
+                        r#"[{"<string>bar</string>":"<string>spam</string>","<string>foo</string>":42}]"#
+                            .to_string()
                     );
                 }
 
@@ -951,7 +1006,7 @@ mod tests {
                 fn with_nested_empty_dict() {
                     assert_eq!(
                         bencode_to_json_unchecked(b"ld3:foodeee"),
-                        r#"[{"foo":{}}]"#.to_string()
+                        r#"[{"<string>foo</string>":{}}]"#.to_string()
                     );
                 }
 
@@ -959,7 +1014,7 @@ mod tests {
                 fn with_two_nested_empty_dicts() {
                     assert_eq!(
                         bencode_to_json_unchecked(b"ld3:food3:foodeeee"),
-                        r#"[{"foo":{"foo":{}}}]"#.to_string()
+                        r#"[{"<string>foo</string>":{"<string>foo</string>":{}}}]"#.to_string()
                     );
                 }
 
@@ -967,7 +1022,7 @@ mod tests {
                 fn with_nested_dict_with_one_field() {
                     assert_eq!(
                         bencode_to_json_unchecked(b"ld3:food3:foo3:bareee"),
-                        r#"[{"foo":{"foo":"bar"}}]"#.to_string()
+                        r#"[{"<string>foo</string>":{"<string>foo</string>":"<string>bar</string>"}}]"#.to_string()
                     );
                 }
 
@@ -975,7 +1030,7 @@ mod tests {
                 fn with_nested_dict_with_two_fields() {
                     assert_eq!(
                         bencode_to_json_unchecked(b"ld3:food3:foo3:bar3:fooi42eeee"),
-                        r#"[{"foo":{"foo":"bar","foo":42}}]"#.to_string()
+                        r#"[{"<string>foo</string>":{"<string>foo</string>":"<string>bar</string>","<string>foo</string>":42}}]"#.to_string()
                     );
                 }
             }
@@ -996,7 +1051,7 @@ mod tests {
             fn two_utf8_strings() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"l5:alice3:bobe"),
-                    r#"["alice","bob"]"#.to_string()
+                    r#"["<string>alice</string>","<string>bob</string>"]"#.to_string()
                 );
             }
 
@@ -1030,7 +1085,7 @@ mod tests {
             fn two_dicts_with_one_item() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"ld3:fooi42eed3:fooi42eee"),
-                    r#"[{"foo":42},{"foo":42}]"#.to_string()
+                    r#"[{"<string>foo</string>":42},{"<string>foo</string>":42}]"#.to_string()
                 );
             }
         }
@@ -1042,7 +1097,7 @@ mod tests {
             fn integer_and_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"li42e5:alicee"),
-                    r#"[42,"alice"]"#.to_string()
+                    r#"[42,"<string>alice</string>"]"#.to_string()
                 );
             }
 
@@ -1082,7 +1137,7 @@ mod tests {
             fn integer_and_dict() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"li42ed3:fooi42eee"),
-                    r#"[42,{"foo":42}]"#.to_string()
+                    r#"[42,{"<string>foo</string>":42}]"#.to_string()
                 );
             }
 
@@ -1090,7 +1145,7 @@ mod tests {
             fn utf8_string_and_integer() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"l5:alicei42ee"),
-                    r#"["alice",42]"#.to_string()
+                    r#"["<string>alice</string>",42]"#.to_string()
                 );
             }
 
@@ -1098,7 +1153,7 @@ mod tests {
             fn utf8_string_and_non_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"l5:alice1:\xFFe"),
-                    r#"["alice","<hex>ff</hex>"]"#.to_string()
+                    r#"["<string>alice</string>","<hex>ff</hex>"]"#.to_string()
                 );
             }
 
@@ -1106,7 +1161,7 @@ mod tests {
             fn utf8_string_and_empty_list() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"l5:alicelee"),
-                    r#"["alice",[]]"#.to_string()
+                    r#"["<string>alice</string>",[]]"#.to_string()
                 );
             }
 
@@ -1114,7 +1169,7 @@ mod tests {
             fn utf8_string_and_list() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"l5:aliceli42eee"),
-                    r#"["alice",[42]]"#.to_string()
+                    r#"["<string>alice</string>",[42]]"#.to_string()
                 );
             }
 
@@ -1122,7 +1177,7 @@ mod tests {
             fn utf8_string_and_empty_dict() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"l5:alicedee"),
-                    r#"["alice",{}]"#.to_string()
+                    r#"["<string>alice</string>",{}]"#.to_string()
                 );
             }
 
@@ -1130,7 +1185,7 @@ mod tests {
             fn utf8_string_and_dict() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"l5:aliced3:fooi42eee"),
-                    r#"["alice",{"foo":42}]"#.to_string()
+                    r#"["<string>alice</string>",{"<string>foo</string>":42}]"#.to_string()
                 );
             }
 
@@ -1146,7 +1201,7 @@ mod tests {
             fn non_utf8_string_and_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"l1:\xFF3:fooe"),
-                    r#"["<hex>ff</hex>","foo"]"#.to_string()
+                    r#"["<hex>ff</hex>","<string>foo</string>"]"#.to_string()
                 );
             }
 
@@ -1178,7 +1233,7 @@ mod tests {
             fn non_utf8_string_and_dict() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"l1:\xFFd3:fooi42eee"),
-                    r#"["<hex>ff</hex>",{"foo":42}]"#.to_string()
+                    r#"["<hex>ff</hex>",{"<string>foo</string>":42}]"#.to_string()
                 );
             }
 
@@ -1194,7 +1249,7 @@ mod tests {
             fn empty_list_and_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"lle3:fooe"),
-                    r#"[[],"foo"]"#.to_string()
+                    r#"[[],"<string>foo</string>"]"#.to_string()
                 );
             }
 
@@ -1215,7 +1270,7 @@ mod tests {
             fn empty_list_and_dict() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"lled3:fooi42eee"),
-                    r#"[[],{"foo":42}]"#.to_string()
+                    r#"[[],{"<string>foo</string>":42}]"#.to_string()
                 );
             }
 
@@ -1231,7 +1286,7 @@ mod tests {
             fn list_and_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"lli42ee3:fooe"),
-                    r#"[[42],"foo"]"#.to_string()
+                    r#"[[42],"<string>foo</string>"]"#.to_string()
                 );
             }
 
@@ -1255,7 +1310,7 @@ mod tests {
             fn list_and_dict() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"lli42eed3:fooi43eee"),
-                    r#"[[42],{"foo":43}]"#.to_string()
+                    r#"[[42],{"<string>foo</string>":43}]"#.to_string()
                 );
             }
 
@@ -1271,7 +1326,7 @@ mod tests {
             fn empty_dict_and_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"lde3:fooe"),
-                    r#"[{},"foo"]"#.to_string()
+                    r#"[{},"<string>foo</string>"]"#.to_string()
                 );
             }
 
@@ -1300,7 +1355,7 @@ mod tests {
             fn dict_and_integer() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"ld3:fooi42eei43ee"),
-                    r#"[{"foo":42},43]"#.to_string()
+                    r#"[{"<string>foo</string>":42},43]"#.to_string()
                 );
             }
 
@@ -1308,7 +1363,7 @@ mod tests {
             fn dict_and_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"ld3:fooi42ee3:fooe"),
-                    r#"[{"foo":42},"foo"]"#.to_string()
+                    r#"[{"<string>foo</string>":42},"<string>foo</string>"]"#.to_string()
                 );
             }
 
@@ -1316,7 +1371,7 @@ mod tests {
             fn dict_and_non_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"ld3:fooi42ee1:\xFFe"),
-                    r#"[{"foo":42},"<hex>ff</hex>"]"#.to_string()
+                    r#"[{"<string>foo</string>":42},"<hex>ff</hex>"]"#.to_string()
                 );
             }
 
@@ -1324,7 +1379,7 @@ mod tests {
             fn dict_and_empty_list() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"ld3:fooi42eelee"),
-                    r#"[{"foo":42},[]]"#.to_string()
+                    r#"[{"<string>foo</string>":42},[]]"#.to_string()
                 );
             }
 
@@ -1332,7 +1387,7 @@ mod tests {
             fn dict_and_list() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"ld3:fooi42eeli43eee"),
-                    r#"[{"foo":42},[43]]"#.to_string()
+                    r#"[{"<string>foo</string>":42},[43]]"#.to_string()
                 );
             }
 
@@ -1403,7 +1458,7 @@ mod tests {
         fn one_nested_empty_dictionary() {
             assert_eq!(
                 bencode_to_json_unchecked(b"d3:foodee"),
-                r#"{"foo":{}}"#.to_string()
+                r#"{"<string>foo</string>":{}}"#.to_string()
             );
         }
 
@@ -1411,7 +1466,7 @@ mod tests {
         fn two_nested_empty_dictionaries() {
             assert_eq!(
                 bencode_to_json_unchecked(b"d3:food3:foodeee"),
-                r#"{"foo":{"foo":{}}}"#.to_string()
+                r#"{"<string>foo</string>":{"<string>foo</string>":{}}}"#.to_string()
             );
         }
 
@@ -1430,7 +1485,7 @@ mod tests {
             fn starting_with_a_digit() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d4:1fooi42ee"),
-                    r#"{"1foo":42}"#.to_string()
+                    r#"{"<string>1foo</string>":42}"#.to_string()
                 );
             }
 
@@ -1450,7 +1505,7 @@ mod tests {
             fn integer() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:fooi42ee"),
-                    r#"{"foo":42}"#.to_string()
+                    r#"{"<string>foo</string>":42}"#.to_string()
                 );
             }
 
@@ -1458,7 +1513,7 @@ mod tests {
             fn utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bar4:spame"),
-                    r#"{"bar":"spam"}"#.to_string()
+                    r#"{"<string>bar</string>":"<string>spam</string>"}"#.to_string()
                 );
             }
 
@@ -1466,7 +1521,7 @@ mod tests {
             fn non_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bar2:\xFF\xFEe"),
-                    r#"{"bar":"<hex>fffe</hex>"}"#.to_string()
+                    r#"{"<string>bar</string>":"<hex>fffe</hex>"}"#.to_string()
                 );
             }
 
@@ -1474,7 +1529,7 @@ mod tests {
             fn empty_list() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:barlee"),
-                    r#"{"bar":[]}"#.to_string()
+                    r#"{"<string>bar</string>":[]}"#.to_string()
                 );
             }
 
@@ -1482,7 +1537,7 @@ mod tests {
             fn empty_dict() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bardee"),
-                    r#"{"bar":{}}"#.to_string()
+                    r#"{"<string>bar</string>":{}}"#.to_string()
                 );
             }
         }
@@ -1494,7 +1549,7 @@ mod tests {
             fn two_integers() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bari42e3:fooi43ee"),
-                    r#"{"bar":42,"foo":43}"#.to_string()
+                    r#"{"<string>bar</string>":42,"<string>foo</string>":43}"#.to_string()
                 );
             }
 
@@ -1502,7 +1557,7 @@ mod tests {
             fn two_empty_utf8_strings() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bar0:3:foo0:e"),
-                    r#"{"bar":"","foo":""}"#.to_string()
+                    r#"{"<string>bar</string>":"<string></string>","<string>foo</string>":"<string></string>"}"#.to_string()
                 );
             }
 
@@ -1510,7 +1565,7 @@ mod tests {
             fn two_utf8_strings() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bar4:spam3:foo5:alicee"),
-                    r#"{"bar":"spam","foo":"alice"}"#.to_string()
+                    r#"{"<string>bar</string>":"<string>spam</string>","<string>foo</string>":"<string>alice</string>"}"#.to_string()
                 );
             }
 
@@ -1518,7 +1573,7 @@ mod tests {
             fn two_non_utf8_strings() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bar1:\xFF3:foo1:\xFEe"),
-                    r#"{"bar":"<hex>ff</hex>","foo":"<hex>fe</hex>"}"#.to_string()
+                    r#"{"<string>bar</string>":"<hex>ff</hex>","<string>foo</string>":"<hex>fe</hex>"}"#.to_string()
                 );
             }
 
@@ -1526,7 +1581,7 @@ mod tests {
             fn two_empty_lists() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:barle3:foolee"),
-                    r#"{"bar":[],"foo":[]}"#.to_string()
+                    r#"{"<string>bar</string>":[],"<string>foo</string>":[]}"#.to_string()
                 );
             }
 
@@ -1534,7 +1589,7 @@ mod tests {
             fn two_empty_dicts() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:barde3:foodee"),
-                    r#"{"bar":{},"foo":{}}"#.to_string()
+                    r#"{"<string>bar</string>":{},"<string>foo</string>":{}}"#.to_string()
                 );
             }
 
@@ -1542,7 +1597,7 @@ mod tests {
             fn two_lists() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:barli42ee3:fooli43eee"),
-                    r#"{"bar":[42],"foo":[43]}"#.to_string()
+                    r#"{"<string>bar</string>":[42],"<string>foo</string>":[43]}"#.to_string()
                 );
             }
 
@@ -1550,7 +1605,8 @@ mod tests {
             fn two_dicts() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bard3:bardee3:food3:foodeee"),
-                    r#"{"bar":{"bar":{}},"foo":{"foo":{}}}"#.to_string()
+                    r#"{"<string>bar</string>":{"<string>bar</string>":{}},"<string>foo</string>":{"<string>foo</string>":{}}}"#
+                        .to_string()
                 );
             }
         }
@@ -1562,7 +1618,7 @@ mod tests {
             fn integer_and_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bari42e3:foo5:alicee"),
-                    r#"{"bar":42,"foo":"alice"}"#.to_string()
+                    r#"{"<string>bar</string>":42,"<string>foo</string>":"<string>alice</string>"}"#.to_string()
                 );
             }
 
@@ -1570,7 +1626,8 @@ mod tests {
             fn integer_and_non_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bari42e3:foo1:\xFFe"),
-                    r#"{"bar":42,"foo":"<hex>ff</hex>"}"#.to_string()
+                    r#"{"<string>bar</string>":42,"<string>foo</string>":"<hex>ff</hex>"}"#
+                        .to_string()
                 );
             }
 
@@ -1578,7 +1635,7 @@ mod tests {
             fn integer_and_empty_list() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bari42e3:foolee"),
-                    r#"{"bar":42,"foo":[]}"#.to_string()
+                    r#"{"<string>bar</string>":42,"<string>foo</string>":[]}"#.to_string()
                 );
             }
 
@@ -1586,7 +1643,7 @@ mod tests {
             fn integer_and_list() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bari42e3:fooli43eee"),
-                    r#"{"bar":42,"foo":[43]}"#.to_string()
+                    r#"{"<string>bar</string>":42,"<string>foo</string>":[43]}"#.to_string()
                 );
             }
 
@@ -1594,7 +1651,7 @@ mod tests {
             fn integer_and_empty_dict() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bari42e3:foodee"),
-                    r#"{"bar":42,"foo":{}}"#.to_string()
+                    r#"{"<string>bar</string>":42,"<string>foo</string>":{}}"#.to_string()
                 );
             }
 
@@ -1602,7 +1659,7 @@ mod tests {
             fn integer_and_dict() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bari42e3:food3:fooi43eee"),
-                    r#"{"bar":42,"foo":{"foo":43}}"#.to_string()
+                    r#"{"<string>bar</string>":42,"<string>foo</string>":{"<string>foo</string>":43}}"#.to_string()
                 );
             }
 
@@ -1610,7 +1667,7 @@ mod tests {
             fn utf8_string_and_integer() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bar5:alice3:fooi43ee"),
-                    r#"{"bar":"alice","foo":43}"#.to_string()
+                    r#"{"<string>bar</string>":"<string>alice</string>","<string>foo</string>":43}"#.to_string()
                 );
             }
 
@@ -1618,7 +1675,8 @@ mod tests {
             fn utf8_string_and_non_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bar5:alice3:foo1:\xFFe"),
-                    r#"{"bar":"alice","foo":"<hex>ff</hex>"}"#.to_string()
+                    r#"{"<string>bar</string>":"<string>alice</string>","<string>foo</string>":"<hex>ff</hex>"}"#
+                        .to_string()
                 );
             }
 
@@ -1626,7 +1684,7 @@ mod tests {
             fn utf8_string_and_empty_list() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bar5:alice3:foolee"),
-                    r#"{"bar":"alice","foo":[]}"#.to_string()
+                    r#"{"<string>bar</string>":"<string>alice</string>","<string>foo</string>":[]}"#.to_string()
                 );
             }
 
@@ -1634,7 +1692,7 @@ mod tests {
             fn utf8_string_and_list() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bar5:alice3:fooli42eee"),
-                    r#"{"bar":"alice","foo":[42]}"#.to_string()
+                    r#"{"<string>bar</string>":"<string>alice</string>","<string>foo</string>":[42]}"#.to_string()
                 );
             }
 
@@ -1642,7 +1700,7 @@ mod tests {
             fn utf8_string_and_empty_dict() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bar5:alice3:foodee"),
-                    r#"{"bar":"alice","foo":{}}"#.to_string()
+                    r#"{"<string>bar</string>":"<string>alice</string>","<string>foo</string>":{}}"#.to_string()
                 );
             }
 
@@ -1650,7 +1708,7 @@ mod tests {
             fn utf8_string_and_dict() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bar5:alice3:food3:fooi42eee"),
-                    r#"{"bar":"alice","foo":{"foo":42}}"#.to_string()
+                    r#"{"<string>bar</string>":"<string>alice</string>","<string>foo</string>":{"<string>foo</string>":42}}"#.to_string()
                 );
             }
 
@@ -1658,7 +1716,8 @@ mod tests {
             fn non_utf8_string_and_integer() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bar1:\xFF3:fooi43ee"),
-                    r#"{"bar":"<hex>ff</hex>","foo":43}"#.to_string()
+                    r#"{"<string>bar</string>":"<hex>ff</hex>","<string>foo</string>":43}"#
+                        .to_string()
                 );
             }
 
@@ -1666,7 +1725,7 @@ mod tests {
             fn non_utf8_string_and_non_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bar1:\xFF3:foo1:\xFFe"),
-                    r#"{"bar":"<hex>ff</hex>","foo":"<hex>ff</hex>"}"#.to_string()
+                    r#"{"<string>bar</string>":"<hex>ff</hex>","<string>foo</string>":"<hex>ff</hex>"}"#.to_string()
                 );
             }
 
@@ -1674,7 +1733,8 @@ mod tests {
             fn non_utf8_string_and_empty_list() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bar1:\xFF3:foolee"),
-                    r#"{"bar":"<hex>ff</hex>","foo":[]}"#.to_string()
+                    r#"{"<string>bar</string>":"<hex>ff</hex>","<string>foo</string>":[]}"#
+                        .to_string()
                 );
             }
 
@@ -1682,7 +1742,8 @@ mod tests {
             fn non_utf8_string_and_list() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bar1:\xFF3:fooli42eee"),
-                    r#"{"bar":"<hex>ff</hex>","foo":[42]}"#.to_string()
+                    r#"{"<string>bar</string>":"<hex>ff</hex>","<string>foo</string>":[42]}"#
+                        .to_string()
                 );
             }
 
@@ -1690,7 +1751,8 @@ mod tests {
             fn non_utf8_string_and_empty_dict() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bar1:\xFF3:foodee"),
-                    r#"{"bar":"<hex>ff</hex>","foo":{}}"#.to_string()
+                    r#"{"<string>bar</string>":"<hex>ff</hex>","<string>foo</string>":{}}"#
+                        .to_string()
                 );
             }
 
@@ -1698,7 +1760,7 @@ mod tests {
             fn non_utf8_string_and_dict() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bar1:\xFF3:food3:fooi42eee"),
-                    r#"{"bar":"<hex>ff</hex>","foo":{"foo":42}}"#.to_string()
+                    r#"{"<string>bar</string>":"<hex>ff</hex>","<string>foo</string>":{"<string>foo</string>":42}}"#.to_string()
                 );
             }
 
@@ -1706,7 +1768,7 @@ mod tests {
             fn empty_list_and_integer() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:barle3:fooi42ee"),
-                    r#"{"bar":[],"foo":42}"#.to_string()
+                    r#"{"<string>bar</string>":[],"<string>foo</string>":42}"#.to_string()
                 );
             }
 
@@ -1714,7 +1776,7 @@ mod tests {
             fn empty_list_and_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:barle3:foo5:alicee"),
-                    r#"{"bar":[],"foo":"alice"}"#.to_string()
+                    r#"{"<string>bar</string>":[],"<string>foo</string>":"<string>alice</string>"}"#.to_string()
                 );
             }
 
@@ -1722,7 +1784,8 @@ mod tests {
             fn empty_list_and_non_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:barle3:foo1:\xFFe"),
-                    r#"{"bar":[],"foo":"<hex>ff</hex>"}"#.to_string()
+                    r#"{"<string>bar</string>":[],"<string>foo</string>":"<hex>ff</hex>"}"#
+                        .to_string()
                 );
             }
 
@@ -1730,7 +1793,7 @@ mod tests {
             fn empty_list_and_empty_dict() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:barle3:foodee"),
-                    r#"{"bar":[],"foo":{}}"#.to_string()
+                    r#"{"<string>bar</string>":[],"<string>foo</string>":{}}"#.to_string()
                 );
             }
 
@@ -1738,7 +1801,7 @@ mod tests {
             fn empty_list_and_dict() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:barle3:food3:foo5:aliceee"),
-                    r#"{"bar":[],"foo":{"foo":"alice"}}"#.to_string()
+                    r#"{"<string>bar</string>":[],"<string>foo</string>":{"<string>foo</string>":"<string>alice</string>"}}"#.to_string()
                 );
             }
 
@@ -1746,7 +1809,7 @@ mod tests {
             fn list_and_integer() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:barli42ee3:fooi42ee"),
-                    r#"{"bar":[42],"foo":42}"#.to_string()
+                    r#"{"<string>bar</string>":[42],"<string>foo</string>":42}"#.to_string()
                 );
             }
 
@@ -1754,7 +1817,7 @@ mod tests {
             fn list_and_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:barli42ee3:foo5:alicee"),
-                    r#"{"bar":[42],"foo":"alice"}"#.to_string()
+                    r#"{"<string>bar</string>":[42],"<string>foo</string>":"<string>alice</string>"}"#.to_string()
                 );
             }
 
@@ -1762,7 +1825,8 @@ mod tests {
             fn list_and_non_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:barli42ee3:foo1:\xFFe"),
-                    r#"{"bar":[42],"foo":"<hex>ff</hex>"}"#.to_string()
+                    r#"{"<string>bar</string>":[42],"<string>foo</string>":"<hex>ff</hex>"}"#
+                        .to_string()
                 );
             }
 
@@ -1770,7 +1834,7 @@ mod tests {
             fn list_and_empty_dict() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:barli42ee3:foodee"),
-                    r#"{"bar":[42],"foo":{}}"#.to_string()
+                    r#"{"<string>bar</string>":[42],"<string>foo</string>":{}}"#.to_string()
                 );
             }
 
@@ -1778,7 +1842,7 @@ mod tests {
             fn list_and_dict() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:barli42ee3:food3:foo5:aliceee"),
-                    r#"{"bar":[42],"foo":{"foo":"alice"}}"#.to_string()
+                    r#"{"<string>bar</string>":[42],"<string>foo</string>":{"<string>foo</string>":"<string>alice</string>"}}"#.to_string()
                 );
             }
 
@@ -1786,7 +1850,7 @@ mod tests {
             fn empty_dict_and_integer() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:barde3:fooi42ee"),
-                    r#"{"bar":{},"foo":42}"#.to_string()
+                    r#"{"<string>bar</string>":{},"<string>foo</string>":42}"#.to_string()
                 );
             }
 
@@ -1794,7 +1858,7 @@ mod tests {
             fn empty_dict_and_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:barde3:foo5:alicee"),
-                    r#"{"bar":{},"foo":"alice"}"#.to_string()
+                    r#"{"<string>bar</string>":{},"<string>foo</string>":"<string>alice</string>"}"#.to_string()
                 );
             }
 
@@ -1802,7 +1866,8 @@ mod tests {
             fn empty_dict_and_non_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:barde3:foo1:\xFFe"),
-                    r#"{"bar":{},"foo":"<hex>ff</hex>"}"#.to_string()
+                    r#"{"<string>bar</string>":{},"<string>foo</string>":"<hex>ff</hex>"}"#
+                        .to_string()
                 );
             }
 
@@ -1810,7 +1875,7 @@ mod tests {
             fn empty_dict_and_empty_list() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:barde3:foolee"),
-                    r#"{"bar":{},"foo":[]}"#.to_string()
+                    r#"{"<string>bar</string>":{},"<string>foo</string>":[]}"#.to_string()
                 );
             }
 
@@ -1818,7 +1883,7 @@ mod tests {
             fn empty_dict_and_list() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:barde3:fooli42eee"),
-                    r#"{"bar":{},"foo":[42]}"#.to_string()
+                    r#"{"<string>bar</string>":{},"<string>foo</string>":[42]}"#.to_string()
                 );
             }
 
@@ -1826,7 +1891,7 @@ mod tests {
             fn dict_and_integer() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bard3:bari42ee3:fooi43ee"),
-                    r#"{"bar":{"bar":42},"foo":43}"#.to_string()
+                    r#"{"<string>bar</string>":{"<string>bar</string>":42},"<string>foo</string>":43}"#.to_string()
                 );
             }
 
@@ -1834,7 +1899,8 @@ mod tests {
             fn dict_and_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bard3:bari42ee3:foo5:alicee"),
-                    r#"{"bar":{"bar":42},"foo":"alice"}"#.to_string()
+                    r#"{"<string>bar</string>":{"<string>bar</string>":42},"<string>foo</string>":"<string>alice</string>"}"#
+                        .to_string()
                 );
             }
 
@@ -1842,7 +1908,8 @@ mod tests {
             fn dict_and_non_utf8_string() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bard3:bari42ee3:foo1:\xFFe"),
-                    r#"{"bar":{"bar":42},"foo":"<hex>ff</hex>"}"#.to_string()
+                    r#"{"<string>bar</string>":{"<string>bar</string>":42},"<string>foo</string>":"<hex>ff</hex>"}"#
+                        .to_string()
                 );
             }
 
@@ -1850,7 +1917,7 @@ mod tests {
             fn dict_and_empty_list() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bard3:bari42ee3:foolee"),
-                    r#"{"bar":{"bar":42},"foo":[]}"#.to_string()
+                    r#"{"<string>bar</string>":{"<string>bar</string>":42},"<string>foo</string>":[]}"#.to_string()
                 );
             }
 
@@ -1858,7 +1925,8 @@ mod tests {
             fn dict_and_list() {
                 assert_eq!(
                     bencode_to_json_unchecked(b"d3:bard3:bari42ee3:fooli42eee"),
-                    r#"{"bar":{"bar":42},"foo":[42]}"#.to_string()
+                    r#"{"<string>bar</string>":{"<string>bar</string>":42},"<string>foo</string>":[42]}"#
+                        .to_string()
                 );
             }
         }
@@ -1876,7 +1944,7 @@ mod tests {
                 fn containing_a_line_break_at_the_beginning_of_the_string() {
                     assert_eq!(
                         bencode_to_json_unchecked("d4:\nfoo3:bare".as_bytes()),
-                        r#"{"\nfoo":"bar"}"#.to_string()
+                        r#"{"<string>\nfoo</string>":"<string>bar</string>"}"#.to_string()
                     );
                 }
 
@@ -1884,7 +1952,7 @@ mod tests {
                 fn containing_a_line_break_in_the_middle_of_the_string() {
                     assert_eq!(
                         bencode_to_json_unchecked("d4:f\noo3:bare".as_bytes()),
-                        r#"{"f\noo":"bar"}"#.to_string()
+                        r#"{"<string>f\noo</string>":"<string>bar</string>"}"#.to_string()
                     );
                 }
 
@@ -1892,7 +1960,7 @@ mod tests {
                 fn containing_a_line_break_at_the_end_of_the_string() {
                     assert_eq!(
                         bencode_to_json_unchecked("d4:foo\n3:bare".as_bytes()),
-                        r#"{"foo\n":"bar"}"#.to_string()
+                        r#"{"<string>foo\n</string>":"<string>bar</string>"}"#.to_string()
                     );
                 }
             }
@@ -1904,7 +1972,7 @@ mod tests {
                 fn containing_a_line_break_at_the_beginning_of_the_string() {
                     assert_eq!(
                         bencode_to_json_unchecked("d3:foo4:\nbare".as_bytes()),
-                        r#"{"foo":"\nbar"}"#.to_string()
+                        r#"{"<string>foo</string>":"<string>\nbar</string>"}"#.to_string()
                     );
                 }
 
@@ -1912,7 +1980,7 @@ mod tests {
                 fn containing_a_line_break_in_the_middle_of_the_string() {
                     assert_eq!(
                         bencode_to_json_unchecked("d3:foo4:ba\nre".as_bytes()),
-                        r#"{"foo":"ba\nr"}"#.to_string()
+                        r#"{"<string>foo</string>":"<string>ba\nr</string>"}"#.to_string()
                     );
                 }
 
@@ -1920,7 +1988,7 @@ mod tests {
                 fn containing_a_line_break_at_the_end_of_the_string() {
                     assert_eq!(
                         bencode_to_json_unchecked("d3:foo4:bar\ne".as_bytes()),
-                        r#"{"foo":"bar\n"}"#.to_string()
+                        r#"{"<string>foo</string>":"<string>bar\n</string>"}"#.to_string()
                     );
                 }
             }

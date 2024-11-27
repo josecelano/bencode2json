@@ -32,19 +32,19 @@ Run the binary with stdin and stdout (UTF-8):
 
 ```console
 echo "4:spam" | cargo run
-"spam"
+"<string>spam</string>"
 ```
 
 Run the binary with stdin and stdout (non UTF-8):
 
 ```console
 printf "d3:bar2:\xFF\xFEe" | cargo run
-{"bar":"<hex>fffe</hex>"}
+{"<string>bar</string>":"<hex>fffe</hex>"}
 ```
 
 ```console
 printf "d2:\xFF\xFE3:bare" | cargo run
-{"<hex>fffe</hex>":"bar"}
+{"<hex>fffe</hex>":"<string>bar</string>"}
 ```
 
 > NOTICE: We need two escape the two bytes `FF` and `FE` with `\x` inside the string.
@@ -53,7 +53,7 @@ More examples:
 
 ```console
 cat ./tests/fixtures/sample.bencode | cargo run
-["spam"]
+["<string>spam</string>"]
 ```
 
 More examples with invalid Bencode:
@@ -81,9 +81,9 @@ echo "d3:foold3:bari42eeee" | cargo run | jq
 
 ```json
 {
-  "foo": [
+  "<string>foo</string>": [
     {
-      "bar": 42
+      "<string>bar</string>": 42
     }
   ]
 }
@@ -121,7 +121,7 @@ use bencode2json::{try_bencode_to_json};
 
 let result = try_bencode_to_json(b"d4:spam4:eggse").unwrap();
 
-assert_eq!(result, r#"{"spam":"eggs"}"#);
+assert_eq!(result, r#"{"<string>spam</string>":"<string>eggs</<string>string>"}"#);
 ```
 
 Example using the low-level parser:
@@ -137,7 +137,7 @@ parser
   .write_str(&mut output)
   .expect("Bencode to JSON conversion failed");
 
-println!("{output}"); // It prints the JSON string: "spam"
+println!("{output}"); // It prints the JSON string: "<string>spam</string>"
 ```
 
 More [examples](./examples/).

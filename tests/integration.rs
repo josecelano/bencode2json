@@ -11,7 +11,7 @@ mod it_should {
         cmd.write_stdin("4:spam")
             .assert()
             .success()
-            .stdout(r#""spam""#);
+            .stdout(r#""<string>spam</string>""#);
     }
 
     #[test]
@@ -31,7 +31,7 @@ mod it_should {
 
         let output_content = fs::read_to_string(output_file).expect("Failed to read output file");
 
-        assert_eq!(output_content.trim(), r#"["spam"]"#);
+        assert_eq!(output_content.trim(), r#"["<string>spam</string>"]"#);
     }
 
     #[test]
@@ -51,7 +51,7 @@ mod it_should {
 
         let output_content = fs::read_to_string(output_file).expect("Failed to read output file");
 
-        assert_eq!(output_content.trim(), r#"["spam"]"#);
+        assert_eq!(output_content.trim(), r#"["<string>spam</string>"]"#);
     }
 
     #[test]

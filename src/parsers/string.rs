@@ -247,7 +247,7 @@ impl Value {
         match str::from_utf8(&self.bytes) {
             Ok(string) => {
                 // String only contains valid UTF-8 chars -> print it as it's
-                string.to_owned()
+                format!("<string>{}</string>", string.to_owned())
             }
             Err(_) => {
                 // String contains non valid UTF-8 chars -> print it as hex bytes
@@ -302,7 +302,7 @@ mod tests {
         fn bencode_to_json_wrapper_succeeds() {
             assert_eq!(
                 try_bencode_to_json(b"4:spam").unwrap(),
-                r#""spam""#.to_string()
+                r#""<string>spam</string>""#.to_string()
             );
         }
 
@@ -314,19 +314,33 @@ mod tests {
 
     #[test]
     fn length_can_contain_leading_zeros() {
-        assert_eq!(bencode_to_json_unchecked(b"00:"), r#""""#.to_string());
+        assert_eq!(
+            bencode_to_json_unchecked(b"00:"),
+            r#""<string></string>""#.to_string()
+        );
     }
 
     #[test]
     fn empty_string() {
-        assert_eq!(bencode_to_json_unchecked(b"0:"), r#""""#.to_string());
+        assert_eq!(
+            bencode_to_json_unchecked(b"0:"),
+            r#""<string></string>""#.to_string()
+        );
+    }
+
+    #[test]
+    fn string_with_tags() {
+        assert_eq!(
+            bencode_to_json_unchecked(b"8:<string>"),
+            r#""<string><string></string>""#.to_string()
+        );
     }
 
     #[test]
     fn utf8() {
         assert_eq!(
             bencode_to_json_unchecked(b"4:spam"),
-            r#""spam""#.to_string()
+            r#""<string>spam</string>""#.to_string()
         );
     }
 
@@ -340,30 +354,78 @@ mod tests {
 
     #[test]
     fn ending_with_bencode_end_char() {
-        assert_eq!(bencode_to_json_unchecked(b"1:e"), r#""e""#.to_string());
+        assert_eq!(
+            bencode_to_json_unchecked(b"1:e"),
+            r#""<string>e</string>""#.to_string()
+        );
     }
 
     #[test]
     fn containing_a_reserved_char() {
-        assert_eq!(bencode_to_json_unchecked(b"1:i"), r#""i""#.to_string());
-        assert_eq!(bencode_to_json_unchecked(b"1:l"), r#""l""#.to_string());
-        assert_eq!(bencode_to_json_unchecked(b"1:d"), r#""d""#.to_string());
-        assert_eq!(bencode_to_json_unchecked(b"1:l"), r#""l""#.to_string());
-        assert_eq!(bencode_to_json_unchecked(b"1:e"), r#""e""#.to_string());
+        assert_eq!(
+            bencode_to_json_unchecked(b"1:i"),
+            r#""<string>i</string>""#.to_string()
+        );
+        assert_eq!(
+            bencode_to_json_unchecked(b"1:l"),
+            r#""<string>l</string>""#.to_string()
+        );
+        assert_eq!(
+            bencode_to_json_unchecked(b"1:d"),
+            r#""<string>d</string>""#.to_string()
+        );
+        assert_eq!(
+            bencode_to_json_unchecked(b"1:l"),
+            r#""<string>l</string>""#.to_string()
+        );
+        assert_eq!(
+            bencode_to_json_unchecked(b"1:e"),
+            r#""<string>e</string>""#.to_string()
+        );
     }
 
     #[test]
     fn containing_a_digit() {
-        assert_eq!(bencode_to_json_unchecked(b"1:0"), r#""0""#.to_string());
-        assert_eq!(bencode_to_json_unchecked(b"1:1"), r#""1""#.to_string());
-        assert_eq!(bencode_to_json_unchecked(b"1:2"), r#""2""#.to_string());
-        assert_eq!(bencode_to_json_unchecked(b"1:3"), r#""3""#.to_string());
-        assert_eq!(bencode_to_json_unchecked(b"1:4"), r#""4""#.to_string());
-        assert_eq!(bencode_to_json_unchecked(b"1:5"), r#""5""#.to_string());
-        assert_eq!(bencode_to_json_unchecked(b"1:6"), r#""6""#.to_string());
-        assert_eq!(bencode_to_json_unchecked(b"1:7"), r#""7""#.to_string());
-        assert_eq!(bencode_to_json_unchecked(b"1:8"), r#""8""#.to_string());
-        assert_eq!(bencode_to_json_unchecked(b"1:9"), r#""9""#.to_string());
+        assert_eq!(
+            bencode_to_json_unchecked(b"1:0"),
+            r#""<string>0</string>""#.to_string()
+        );
+        assert_eq!(
+            bencode_to_json_unchecked(b"1:1"),
+            r#""<string>1</string>""#.to_string()
+        );
+        assert_eq!(
+            bencode_to_json_unchecked(b"1:2"),
+            r#""<string>2</string>""#.to_string()
+        );
+        assert_eq!(
+            bencode_to_json_unchecked(b"1:3"),
+            r#""<string>3</string>""#.to_string()
+        );
+        assert_eq!(
+            bencode_to_json_unchecked(b"1:4"),
+            r#""<string>4</string>""#.to_string()
+        );
+        assert_eq!(
+            bencode_to_json_unchecked(b"1:5"),
+            r#""<string>5</string>""#.to_string()
+        );
+        assert_eq!(
+            bencode_to_json_unchecked(b"1:6"),
+            r#""<string>6</string>""#.to_string()
+        );
+        assert_eq!(
+            bencode_to_json_unchecked(b"1:7"),
+            r#""<string>7</string>""#.to_string()
+        );
+        assert_eq!(
+            bencode_to_json_unchecked(b"1:8"),
+            r#""<string>8</string>""#.to_string()
+        );
+        assert_eq!(
+            bencode_to_json_unchecked(b"1:9"),
+            r#""<string>9</string>""#.to_string()
+        );
     }
 
     mod should_escape_json {
@@ -373,7 +435,7 @@ mod tests {
         fn containing_a_double_quote() {
             assert_eq!(
                 bencode_to_json_unchecked("1:\"".as_bytes()),
-                r#""\"""#.to_string()
+                r#""<string>\"</string>""#.to_string()
             );
         }
 
@@ -381,7 +443,7 @@ mod tests {
         fn containing_backslashes() {
             assert_eq!(
                 bencode_to_json_unchecked("1:\\".as_bytes()),
-                r#""\\""#.to_string()
+                r#""<string>\\</string>""#.to_string()
             );
         }
 
@@ -389,15 +451,15 @@ mod tests {
         fn containing_control_characters() {
             assert_eq!(
                 bencode_to_json_unchecked("1:\n".as_bytes()),
-                r#""\n""#.to_string()
+                r#""<string>\n</string>""#.to_string()
             );
             assert_eq!(
                 bencode_to_json_unchecked("1:\r".as_bytes()),
-                r#""\r""#.to_string()
+                r#""<string>\r</string>""#.to_string()
             );
             assert_eq!(
                 bencode_to_json_unchecked("1:\t".as_bytes()),
-                r#""\t""#.to_string()
+                r#""<string>\t</string>""#.to_string()
             );
         }
 
@@ -405,7 +467,7 @@ mod tests {
         fn containing_unicode_characters() {
             assert_eq!(
                 bencode_to_json_unchecked(&to_bencode("ñandú")),
-                r#""ñandú""#.to_string()
+                r#""<string>ñandú</string>""#.to_string()
             );
         }
 

@@ -31,9 +31,13 @@ enum StateExpecting {
 ///
 /// Will panic if we reach the end of the input without completing the integer
 /// (without reaching the end of the integer `e`).
-pub fn parse<R: Read, W: Writer>(reader: &mut ByteReader<R>, writer: &mut W) -> Result<(), Error> {
+pub fn parse<R: Read, W: Writer>(
+    reader: &mut ByteReader<R>,
+    writer: &mut W,
+) -> Result<Vec<u8>, Error> {
     let mut state = StateExpecting::Start;
     let mut first_digit_is_zero = false;
+    let mut value = vec![];
 
     loop {
         let byte = next_byte(reader, writer)?;
@@ -48,10 +52,12 @@ pub fn parse<R: Read, W: Writer>(reader: &mut ByteReader<R>, writer: &mut W) -> 
             StateExpecting::DigitOrSign => {
                 if char == '-' {
                     writer.write_byte(byte)?;
+                    value.push(byte);
 
                     StateExpecting::DigitAfterSign
                 } else if char.is_ascii_digit() {
                     writer.write_byte(byte)?;
+                    value.push(byte);
 
                     if char == '0' {
                         first_digit_is_zero = true;
@@ -76,6 +82,7 @@ pub fn parse<R: Read, W: Writer>(reader: &mut ByteReader<R>, writer: &mut W) -> 
             StateExpecting::DigitAfterSign => {
                 if char.is_ascii_digit() {
                     writer.write_byte(byte)?;
+                    value.push(byte);
 
                     if char == '0' {
                         first_digit_is_zero = true;
@@ -100,6 +107,7 @@ pub fn parse<R: Read, W: Writer>(reader: &mut ByteReader<R>, writer: &mut W) -> 
             StateExpecting::DigitOrEnd => {
                 if char.is_ascii_digit() {
                     writer.write_byte(byte)?;
+                    value.push(byte);
 
                     if char == '0' && first_digit_is_zero {
                         return Err(Error::LeadingZerosInIntegersNotAllowed(
@@ -118,7 +126,7 @@ pub fn parse<R: Read, W: Writer>(reader: &mut ByteReader<R>, writer: &mut W) -> 
 
                     StateExpecting::DigitOrEnd
                 } else if byte == BENCODE_END_INTEGER {
-                    return Ok(());
+                    return Ok(value);
                 } else {
                     return Err(Error::UnexpectedByteParsingInteger(
                         ReadContext {
@@ -185,12 +193,12 @@ mod tests {
         let mut output = String::new();
 
         match parse_bencode(input_buffer, &mut output) {
-            Ok(()) => Ok(output),
+            Ok(_value) => Ok(output),
             Err(err) => Err(err),
         }
     }
 
-    fn parse_bencode(input_buffer: &[u8], output: &mut String) -> Result<(), Error> {
+    fn parse_bencode(input_buffer: &[u8], output: &mut String) -> Result<Vec<u8>, Error> {
         let mut reader = ByteReader::new(input_buffer);
 
         let mut writer = StringWriter::new(output);

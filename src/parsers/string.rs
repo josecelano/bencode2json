@@ -25,7 +25,10 @@ use super::error::{Error, ReadContext, WriteContext};
 /// # Panics
 ///
 /// Will panic if we reach the end of the input without completing the string.
-pub fn parse<R: Read, W: Writer>(reader: &mut ByteReader<R>, writer: &mut W) -> Result<(), Error> {
+pub fn parse<R: Read, W: Writer>(
+    reader: &mut ByteReader<R>,
+    writer: &mut W,
+) -> Result<Vec<u8>, Error> {
     let mut string_parser = StringParser::default();
     string_parser.parse(reader, writer)
 }
@@ -46,20 +49,20 @@ impl StringParser {
         &mut self,
         reader: &mut ByteReader<R>,
         writer: &mut W,
-    ) -> Result<(), Error> {
+    ) -> Result<Vec<u8>, Error> {
         let mut length = Length::default();
 
         length.parse(reader, writer)?;
 
         let mut value = Value::new(length.number);
 
-        value.parse(reader, writer)?;
+        let value_bytes = value.parse(reader, writer)?;
 
         self.parsed_value = value.utf8();
 
         writer.write_str(&self.json())?;
 
-        Ok(())
+        Ok(value_bytes)
     }
 
     /// It returns the final parsed value as string.
@@ -202,12 +205,12 @@ impl Value {
         &mut self,
         reader: &mut ByteReader<R>,
         writer: &W,
-    ) -> Result<(), Error> {
+    ) -> Result<Vec<u8>, Error> {
         for _i in 1..=self.length {
             self.add_byte(Self::next_byte(reader, writer)?);
         }
 
-        Ok(())
+        Ok(self.bytes.clone())
     }
 
     /// It reads the next byte from the input.
@@ -282,12 +285,12 @@ mod tests {
         let mut output = String::new();
 
         match parse_bencode(input_buffer, &mut output) {
-            Ok(()) => Ok(output),
+            Ok(_string_value_bytes) => Ok(output),
             Err(err) => Err(err),
         }
     }
 
-    fn parse_bencode(input_buffer: &[u8], output: &mut String) -> Result<(), Error> {
+    fn parse_bencode(input_buffer: &[u8], output: &mut String) -> Result<Vec<u8>, Error> {
         let mut reader = ByteReader::new(input_buffer);
 
         let mut writer = StringWriter::new(output);

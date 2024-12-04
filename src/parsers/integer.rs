@@ -7,7 +7,7 @@ use crate::rw::{byte_reader::ByteReader, writer::Writer};
 
 use super::{
     error::{Error, ReadContext, WriteContext},
-    BENCODE_END_INTEGER,
+    tokenizer::BENCODE_END_INTEGER,
 };
 
 /// The current state parsing the integer.

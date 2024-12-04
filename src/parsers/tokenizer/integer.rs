@@ -134,34 +134,22 @@ fn next_byte<R: Read>(reader: &mut ByteReader<R>) -> Result<u8, Error> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        parsers::{error::Error, integer::parse},
-        rw::{byte_reader::ByteReader, string_writer::StringWriter},
-    };
+    use crate::{parsers::error::Error, rw::byte_reader::ByteReader};
 
-    fn bencode_to_json_unchecked(input_buffer: &[u8]) -> String {
-        let mut output = String::new();
+    use super::parse;
 
-        parse_bencode(input_buffer, &mut output).expect("Bencode to JSON conversion failed");
-
-        output
+    fn bencode_to_json_unchecked(input_buffer: &[u8]) -> Vec<u8> {
+        parse_bencode(input_buffer).expect("Bencode to JSON conversion failed")
     }
 
-    fn try_bencode_to_json(input_buffer: &[u8]) -> Result<String, Error> {
-        let mut output = String::new();
-
-        match parse_bencode(input_buffer, &mut output) {
-            Ok(_value) => Ok(output),
-            Err(err) => Err(err),
-        }
+    fn try_bencode_to_json(input_buffer: &[u8]) -> Result<Vec<u8>, Error> {
+        parse_bencode(input_buffer)
     }
 
-    fn parse_bencode(input_buffer: &[u8], output: &mut String) -> Result<Vec<u8>, Error> {
+    fn parse_bencode(input_buffer: &[u8]) -> Result<Vec<u8>, Error> {
         let mut reader = ByteReader::new(input_buffer);
 
-        let mut writer = StringWriter::new(output);
-
-        parse(&mut reader, &mut writer)
+        parse(&mut reader)
     }
 
     mod for_helpers {
@@ -169,7 +157,7 @@ mod tests {
 
         #[test]
         fn bencode_to_json_wrapper_succeeds() {
-            assert_eq!(try_bencode_to_json(b"i0e").unwrap(), "0".to_string());
+            assert_eq!(try_bencode_to_json(b"i0e").unwrap(), "0".as_bytes());
         }
 
         #[test]
@@ -180,22 +168,22 @@ mod tests {
 
     #[test]
     fn zero() {
-        assert_eq!(bencode_to_json_unchecked(b"i0e"), "0".to_string());
+        assert_eq!(bencode_to_json_unchecked(b"i0e"), "0".as_bytes());
     }
 
     #[test]
     fn one_digit_integer() {
-        assert_eq!(bencode_to_json_unchecked(b"i1e"), "1".to_string());
+        assert_eq!(bencode_to_json_unchecked(b"i1e"), "1".as_bytes());
     }
 
     #[test]
     fn two_digits_integer() {
-        assert_eq!(bencode_to_json_unchecked(b"i42e"), "42".to_string());
+        assert_eq!(bencode_to_json_unchecked(b"i42e"), "42".as_bytes());
     }
 
     #[test]
     fn negative_integer() {
-        assert_eq!(bencode_to_json_unchecked(b"i-1e"), "-1".to_string());
+        assert_eq!(bencode_to_json_unchecked(b"i-1e"), "-1".as_bytes());
     }
 
     mod it_should_fail {

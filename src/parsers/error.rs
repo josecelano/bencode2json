@@ -62,20 +62,20 @@ pub enum Error {
     ///
     /// The string parser found an invalid byte for the string length. The
     /// length can only be made of digits (0-9).
-    #[error("Invalid string length byte, expected a digit; {0}; {1}")]
-    InvalidStringLengthByte(ReadContext, WriteContext),
+    #[error("Invalid string length byte, expected a digit; {0}")]
+    InvalidStringLengthByte(ReadContext),
 
     /// Unexpected end of input parsing string length.
     ///
     /// The input ends before the string length ends.
-    #[error("Unexpected end of input parsing string length; {0}; {1}")]
-    UnexpectedEndOfInputParsingStringLength(ReadContext, WriteContext),
+    #[error("Unexpected end of input parsing string length; {0}")]
+    UnexpectedEndOfInputParsingStringLength(ReadContext),
 
     /// Unexpected end of input parsing string value.
     ///
     /// The input ends before the string value ends.
-    #[error("Unexpected end of input parsing string value; {0}; {1}")]
-    UnexpectedEndOfInputParsingStringValue(ReadContext, WriteContext),
+    #[error("Unexpected end of input parsing string value; {0}")]
+    UnexpectedEndOfInputParsingStringValue(ReadContext),
 
     // Lists
     /// Unexpected end of input parsing list. Expecting first list item or list end.

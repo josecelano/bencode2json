@@ -6,11 +6,10 @@ use std::io::{self, Read};
 
 use super::error::{self, ReadContext};
 
-use crate::rw::{byte_reader::ByteReader, byte_writer::ByteWriter};
+use crate::rw::byte_reader::ByteReader;
 
 /* TODO:
 
-- Remove writer from tokenizer.
 - Implement trait Iterator for tokenizer.
 
 */
@@ -51,12 +50,7 @@ impl<R: Read> BencodeTokenizer<R> {
     ///
     /// - It can't read from the input.
     pub fn next_token(&mut self) -> Result<Option<BencodeToken>, error::Error> {
-        let capture_output = Vec::new();
-        let mut null_writer = ByteWriter::new(capture_output);
-
-        let opt_peeked_byte = Self::peek_byte(&mut self.byte_reader)?;
-
-        match opt_peeked_byte {
+        match Self::peek_byte(&mut self.byte_reader)? {
             Some(peeked_byte) => {
                 match peeked_byte {
                     BENCODE_BEGIN_INTEGER => {
@@ -64,7 +58,7 @@ impl<R: Read> BencodeTokenizer<R> {
                         Ok(Some(BencodeToken::Integer(value)))
                     }
                     b'0'..=b'9' => {
-                        let value = string::parse(&mut self.byte_reader, &mut null_writer)?;
+                        let value = string::parse(&mut self.byte_reader)?;
                         Ok(Some(BencodeToken::String(value)))
                     }
                     BENCODE_BEGIN_LIST => {

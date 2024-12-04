@@ -4,9 +4,7 @@
 //! ``BencodeParser`` is the main parser. It is generic over the type of the
 //! input buffer.
 pub mod error;
-pub mod integer;
 pub mod stack;
-pub mod string;
 pub mod tokenizer;
 
 /* TODO:

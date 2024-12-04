@@ -134,7 +134,7 @@ fn next_byte<R: Read>(reader: &mut ByteReader<R>) -> Result<u8, Error> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{parsers::error::Error, rw::byte_reader::ByteReader};
+    use crate::{error::Error, rw::byte_reader::ByteReader};
 
     use super::parse;
 
@@ -153,7 +153,7 @@ mod tests {
     }
 
     mod for_helpers {
-        use crate::parsers::tokenizer::integer::tests::try_bencode_to_json;
+        use crate::tokenizer::integer::tests::try_bencode_to_json;
 
         #[test]
         fn bencode_to_json_wrapper_succeeds() {
@@ -190,11 +190,9 @@ mod tests {
         use std::io::{self, Read};
 
         use crate::{
-            parsers::{
-                error::Error,
-                tokenizer::integer::{parse, tests::try_bencode_to_json},
-            },
+            error::Error,
             rw::byte_reader::ByteReader,
+            tokenizer::integer::{parse, tests::try_bencode_to_json},
         };
 
         #[test]
@@ -250,7 +248,7 @@ mod tests {
         }
 
         mod when_it_receives_a_unexpected_byte {
-            use crate::parsers::{error::Error, tokenizer::integer::tests::try_bencode_to_json};
+            use crate::{error::Error, tokenizer::integer::tests::try_bencode_to_json};
 
             #[test]
             fn while_expecting_a_digit_or_sign() {

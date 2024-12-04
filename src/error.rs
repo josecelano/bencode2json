@@ -197,7 +197,7 @@ impl fmt::Display for WriteContext {
 mod tests {
 
     mod for_read_context {
-        use crate::parsers::error::ReadContext;
+        use crate::error::ReadContext;
 
         #[test]
         fn it_should_display_the_read_context() {
@@ -237,7 +237,7 @@ mod tests {
     }
 
     mod for_write_context {
-        use crate::parsers::error::WriteContext;
+        use crate::error::WriteContext;
 
         #[test]
         fn it_should_display_the_read_context() {

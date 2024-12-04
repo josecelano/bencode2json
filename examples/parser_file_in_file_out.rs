@@ -10,7 +10,7 @@ use std::{
     io::{Read, Write},
 };
 
-use bencode2json::parsers::generators::json::BencodeParser;
+use bencode2json::generators::json::BencodeParser;
 use clap::{Arg, Command};
 
 fn main() {

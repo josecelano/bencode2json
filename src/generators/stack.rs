@@ -150,7 +150,7 @@ impl Stack {
 #[cfg(test)]
 mod tests {
     mod the_stack_state {
-        use crate::parsers::generators::stack::State;
+        use crate::generators::stack::State;
 
         #[test]
         fn should_be_displayed_with_single_letter_abbreviations() {
@@ -165,7 +165,7 @@ mod tests {
 
     mod the_stack {
         mod it_should {
-            use crate::parsers::generators::stack::{Stack, State};
+            use crate::generators::stack::{Stack, State};
 
             #[test]
             fn have_an_initial_state() {
@@ -235,7 +235,7 @@ mod tests {
 
             mod be_displayed_with_single_letter_abbreviations_for_states {
 
-                use crate::parsers::generators::stack::{Stack, State};
+                use crate::generators::stack::{Stack, State};
 
                 #[test]
                 fn with_the_initial_state() {

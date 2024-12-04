@@ -17,11 +17,9 @@ use super::{
 use tokenizer::{BencodeToken, Tokenizer};
 
 use crate::{
-    parsers::{
-        error::{self, ReadContext, WriteContext},
-        tokenizer,
-    },
+    error::{self, ReadContext, WriteContext},
     rw::{byte_writer::ByteWriter, string_writer::StringWriter, writer::Writer},
+    tokenizer,
 };
 
 pub struct BencodeParser<R: Read> {
@@ -355,10 +353,10 @@ mod tests {
 
     use std::io::{self, Read};
 
-    use crate::parsers::generators::json::BencodeParser;
+    use crate::generators::json::BencodeParser;
 
     mod it_should_allow_writing {
-        use crate::parsers::generators::json::BencodeParser;
+        use crate::generators::json::BencodeParser;
 
         #[test]
         fn to_any_type_implementing_io_write_trait() {
@@ -411,7 +409,7 @@ mod tests {
 
     mod it_should_allow_special_bencode_cases {
 
-        use crate::{parsers::generators::json::BencodeParser, test::bencode_to_json_unchecked};
+        use crate::{generators::json::BencodeParser, test::bencode_to_json_unchecked};
 
         #[test]
         fn an_empty_input() {
@@ -448,10 +446,7 @@ mod tests {
     mod it_should_fail {
         use std::io::{self, Read};
 
-        use crate::{
-            parsers::{error::Error, generators::json::BencodeParser},
-            try_bencode_to_json,
-        };
+        use crate::{error::Error, generators::json::BencodeParser, try_bencode_to_json};
 
         #[test]
         fn when_there_is_a_problem_reading_from_input() {
@@ -548,7 +543,7 @@ mod tests {
         }
 
         mod should_fail {
-            use crate::{parsers::error::Error, try_bencode_to_json};
+            use crate::{error::Error, try_bencode_to_json};
 
             #[test]
             fn when_it_finds_an_invalid_byte() {
@@ -754,7 +749,7 @@ mod tests {
         }
 
         mod it_should_fail_parsing_when {
-            use crate::{parsers::error::Error, try_bencode_to_json};
+            use crate::{error::Error, try_bencode_to_json};
 
             #[test]
             fn it_reaches_the_end_of_the_input_parsing_the_string_length() {
@@ -1327,7 +1322,7 @@ mod tests {
         }
 
         mod should_fail {
-            use crate::{parsers::error::Error, try_bencode_to_json};
+            use crate::{error::Error, try_bencode_to_json};
 
             #[test]
             fn when_an_empty_list_does_not_have_the_matching_close_byte() {
@@ -1920,7 +1915,7 @@ mod tests {
         }
 
         mod should_fail {
-            use crate::{parsers::error::Error, try_bencode_to_json};
+            use crate::{error::Error, try_bencode_to_json};
 
             #[test]
             fn when_an_empty_dict_does_not_have_the_matching_close_byte() {
@@ -1998,8 +1993,8 @@ mod tests {
             }
 
             mod when_the_field_key_is_not_a_string_for_example {
-                use crate::parsers::error::Error;
-                use crate::parsers::generators::json::BencodeType;
+                use crate::error::Error;
+                use crate::generators::json::BencodeType;
                 use crate::try_bencode_to_json;
 
                 #[test]

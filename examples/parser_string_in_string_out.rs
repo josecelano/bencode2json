@@ -5,7 +5,7 @@
 //! ```
 //!
 //! It prints "spam".
-use bencode2json::parsers::generators::json::BencodeParser;
+use bencode2json::generators::json::BencodeParser;
 
 fn main() {
     let input = "4:spam".to_string();

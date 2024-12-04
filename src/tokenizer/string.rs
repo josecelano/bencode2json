@@ -210,7 +210,7 @@ impl Value {
 
 #[cfg(test)]
 mod tests {
-    use crate::{parsers::error::Error, rw::byte_reader::ByteReader};
+    use crate::{error::Error, rw::byte_reader::ByteReader};
 
     use super::parse;
 
@@ -228,7 +228,7 @@ mod tests {
     }
 
     mod for_helpers {
-        use crate::parsers::tokenizer::string::tests::try_bencode_to_json;
+        use crate::tokenizer::string::tests::try_bencode_to_json;
 
         #[test]
         fn bencode_to_json_wrapper_succeeds() {
@@ -356,11 +356,9 @@ mod tests {
         use std::io::{self, Read};
 
         use crate::{
-            parsers::{
-                error::Error,
-                tokenizer::string::{parse, tests::try_bencode_to_json},
-            },
+            error::Error,
             rw::byte_reader::ByteReader,
+            tokenizer::string::{parse, tests::try_bencode_to_json},
         };
 
         #[test]

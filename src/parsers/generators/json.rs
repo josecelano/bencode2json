@@ -14,7 +14,7 @@ use super::{
     stack::{Stack, State},
     BencodeType,
 };
-use tokenizer::{BencodeToken, BencodeTokenizer};
+use tokenizer::{BencodeToken, Tokenizer};
 
 use crate::{
     parsers::{
@@ -25,7 +25,7 @@ use crate::{
 };
 
 pub struct BencodeParser<R: Read> {
-    tokenizer: BencodeTokenizer<R>,
+    tokenizer: Tokenizer<R>,
     num_processed_tokens: u64,
     stack: Stack,
 }
@@ -42,7 +42,7 @@ impl<R: Read> BencodeParser<R> {
 
     pub fn new(reader: R) -> Self {
         BencodeParser {
-            tokenizer: BencodeTokenizer::new(reader),
+            tokenizer: Tokenizer::new(reader),
             num_processed_tokens: 1,
             stack: Stack::default(),
         }

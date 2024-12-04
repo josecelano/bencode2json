@@ -31,13 +31,13 @@ pub enum BencodeToken {
     LineBreak,
 }
 
-pub struct BencodeTokenizer<R: Read> {
+pub struct Tokenizer<R: Read> {
     byte_reader: ByteReader<R>,
 }
 
-impl<R: Read> BencodeTokenizer<R> {
+impl<R: Read> Tokenizer<R> {
     pub fn new(reader: R) -> Self {
-        BencodeTokenizer {
+        Tokenizer {
             byte_reader: ByteReader::new(reader),
         }
     }

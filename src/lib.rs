@@ -34,7 +34,7 @@
 //!
 //! > __NOTICE__: In the context of this lib, parser is a function that takes an input
 //! > containing bencoded data and produces a JSON output (raw bytes or UTF-8 string).
-use parsers::{error::Error, BencodeParser};
+use parsers::{error::Error, generators::json::BencodeParser};
 
 pub mod parsers;
 pub mod rw;

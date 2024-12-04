@@ -9,7 +9,7 @@ use thiserror::Error;
 
 use crate::rw;
 
-use super::BencodeType;
+use super::generators::BencodeType;
 
 /// Errors that can occur while parsing a bencoded value.
 #[derive(Debug, Error)]
@@ -121,7 +121,7 @@ pub enum Error {
     NoMatchingStartForListOrDictEnd(ReadContext, WriteContext),
 }
 
-/// The reader context when the error ocurred.
+/// The reader context when the error occurred.
 #[derive(Debug)]
 pub struct ReadContext {
     /// The read byte that caused the error if any.
@@ -157,7 +157,7 @@ impl fmt::Display for ReadContext {
     }
 }
 
-/// The writer context when the error ocurred.
+/// The writer context when the error occurred.
 #[derive(Debug)]
 pub struct WriteContext {
     /// The written byte that caused the error if any.

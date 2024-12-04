@@ -13,7 +13,7 @@
 //! ```text
 //! cargo run -- -i ./tests/fixtures/sample.bencode -o output.json
 //! ```
-use bencode2json::parsers::BencodeParser;
+use bencode2json::parsers::generators::json::BencodeParser;
 use clap::{Arg, Command};
 use std::fs::File;
 use std::io::{self, Read, Write};

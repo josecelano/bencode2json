@@ -44,18 +44,18 @@ pub enum Error {
     /// The main parser parses integers by reading bytes until it finds the
     /// end of the integer. This error is raised when the byte read is not a
     /// valid byte for an integer bencoded value.
-    #[error("Unexpected byte parsing integer; {0}; {1}")]
-    UnexpectedByteParsingInteger(ReadContext, WriteContext),
+    #[error("Unexpected byte parsing integer; {0}")]
+    UnexpectedByteParsingInteger(ReadContext),
 
     /// Unexpected end of input parsing integer.
     ///
     /// The input ends before the integer ends.
-    #[error("Unexpected end of input parsing integer; {0}; {1}")]
-    UnexpectedEndOfInputParsingInteger(ReadContext, WriteContext),
+    #[error("Unexpected end of input parsing integer; {0}")]
+    UnexpectedEndOfInputParsingInteger(ReadContext),
 
     /// Leading zeros in integers are not allowed, for example b'i00e'.
-    #[error("Leading zeros in integers are not allowed, for example b'i00e'; {0}; {1}")]
-    LeadingZerosInIntegersNotAllowed(ReadContext, WriteContext),
+    #[error("Leading zeros in integers are not allowed, for example b'i00e'; {0}")]
+    LeadingZerosInIntegersNotAllowed(ReadContext),
 
     // Strings
     /// Invalid string length byte, expected a digit.

@@ -60,7 +60,7 @@ impl<R: Read> BencodeTokenizer<R> {
             Some(peeked_byte) => {
                 match peeked_byte {
                     BENCODE_BEGIN_INTEGER => {
-                        let value = integer::parse(&mut self.byte_reader, &mut null_writer)?;
+                        let value = integer::parse(&mut self.byte_reader)?;
                         Ok(Some(BencodeToken::Integer(value)))
                     }
                     b'0'..=b'9' => {

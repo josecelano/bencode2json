@@ -6,7 +6,7 @@ use std::io::{self, Read};
 use crate::rw::{byte_reader::ByteReader, writer::Writer};
 
 use super::{
-    error::{Error, ReadContext, WriteContext},
+    error::{Error, ReadContext},
     tokenizer::BENCODE_END_INTEGER,
 };
 
@@ -40,7 +40,7 @@ pub fn parse<R: Read, W: Writer>(
     let mut value = vec![];
 
     loop {
-        let byte = next_byte(reader, writer)?;
+        let byte = next_byte(reader)?;
 
         let char = byte as char;
 
@@ -65,18 +65,11 @@ pub fn parse<R: Read, W: Writer>(
 
                     StateExpecting::DigitOrEnd
                 } else {
-                    return Err(Error::UnexpectedByteParsingInteger(
-                        ReadContext {
-                            byte: Some(byte),
-                            pos: reader.input_byte_counter(),
-                            latest_bytes: reader.captured_bytes(),
-                        },
-                        WriteContext {
-                            byte: Some(byte),
-                            pos: writer.output_byte_counter(),
-                            latest_bytes: writer.captured_bytes(),
-                        },
-                    ));
+                    return Err(Error::UnexpectedByteParsingInteger(ReadContext {
+                        byte: Some(byte),
+                        pos: reader.input_byte_counter(),
+                        latest_bytes: reader.captured_bytes(),
+                    }));
                 }
             }
             StateExpecting::DigitAfterSign => {
@@ -90,18 +83,11 @@ pub fn parse<R: Read, W: Writer>(
 
                     StateExpecting::DigitOrEnd
                 } else {
-                    return Err(Error::UnexpectedByteParsingInteger(
-                        ReadContext {
-                            byte: Some(byte),
-                            pos: reader.input_byte_counter(),
-                            latest_bytes: reader.captured_bytes(),
-                        },
-                        WriteContext {
-                            byte: Some(byte),
-                            pos: writer.output_byte_counter(),
-                            latest_bytes: writer.captured_bytes(),
-                        },
-                    ));
+                    return Err(Error::UnexpectedByteParsingInteger(ReadContext {
+                        byte: Some(byte),
+                        pos: reader.input_byte_counter(),
+                        latest_bytes: reader.captured_bytes(),
+                    }));
                 }
             }
             StateExpecting::DigitOrEnd => {
@@ -110,36 +96,22 @@ pub fn parse<R: Read, W: Writer>(
                     value.push(byte);
 
                     if char == '0' && first_digit_is_zero {
-                        return Err(Error::LeadingZerosInIntegersNotAllowed(
-                            ReadContext {
-                                byte: Some(byte),
-                                pos: reader.input_byte_counter(),
-                                latest_bytes: reader.captured_bytes(),
-                            },
-                            WriteContext {
-                                byte: Some(byte),
-                                pos: writer.output_byte_counter(),
-                                latest_bytes: writer.captured_bytes(),
-                            },
-                        ));
+                        return Err(Error::LeadingZerosInIntegersNotAllowed(ReadContext {
+                            byte: Some(byte),
+                            pos: reader.input_byte_counter(),
+                            latest_bytes: reader.captured_bytes(),
+                        }));
                     }
 
                     StateExpecting::DigitOrEnd
                 } else if byte == BENCODE_END_INTEGER {
                     return Ok(value);
                 } else {
-                    return Err(Error::UnexpectedByteParsingInteger(
-                        ReadContext {
-                            byte: Some(byte),
-                            pos: reader.input_byte_counter(),
-                            latest_bytes: reader.captured_bytes(),
-                        },
-                        WriteContext {
-                            byte: Some(byte),
-                            pos: writer.output_byte_counter(),
-                            latest_bytes: writer.captured_bytes(),
-                        },
-                    ));
+                    return Err(Error::UnexpectedByteParsingInteger(ReadContext {
+                        byte: Some(byte),
+                        pos: reader.input_byte_counter(),
+                        latest_bytes: reader.captured_bytes(),
+                    }));
                 }
             }
         };
@@ -151,23 +123,16 @@ pub fn parse<R: Read, W: Writer>(
 /// # Errors
 ///
 /// Will return an error if the end of input was reached.
-fn next_byte<R: Read, W: Writer>(reader: &mut ByteReader<R>, writer: &W) -> Result<u8, Error> {
+fn next_byte<R: Read>(reader: &mut ByteReader<R>) -> Result<u8, Error> {
     match reader.read_byte() {
         Ok(byte) => Ok(byte),
         Err(err) => {
             if err.kind() == io::ErrorKind::UnexpectedEof {
-                return Err(Error::UnexpectedEndOfInputParsingInteger(
-                    ReadContext {
-                        byte: None,
-                        pos: reader.input_byte_counter(),
-                        latest_bytes: reader.captured_bytes(),
-                    },
-                    WriteContext {
-                        byte: None,
-                        pos: writer.output_byte_counter(),
-                        latest_bytes: writer.captured_bytes(),
-                    },
-                ));
+                return Err(Error::UnexpectedEndOfInputParsingInteger(ReadContext {
+                    byte: None,
+                    pos: reader.input_byte_counter(),
+                    latest_bytes: reader.captured_bytes(),
+                }));
             }
             Err(err.into())
         }

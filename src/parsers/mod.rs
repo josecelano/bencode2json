@@ -104,10 +104,7 @@ impl<R: Read> BencodeParser<R> {
     /// - It can't read from the input or write to the output.
     /// - The input is invalid Bencode.
     fn parse<W: Writer>(&mut self, writer: &mut W) -> Result<(), error::Error> {
-        let capture_output = Vec::new();
-        let mut null_writer = ByteWriter::new(capture_output);
-
-        while let Some(token) = self.tokenizer.next_token(&mut null_writer)? {
+        while let Some(token) = self.tokenizer.next_token()? {
             match token {
                 BencodeToken::Integer(integer_bytes) => {
                     self.begin_bencoded_value(BencodeType::Integer, writer)?;

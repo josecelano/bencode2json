@@ -27,16 +27,16 @@ pub enum Error {
     /// The main parser peeks one byte ahead to know what kind of bencoded value
     /// is being parsed. If the byte read after peeking does not match the
     /// peeked byte, it means the input is being consumed somewhere else.
-    #[error("Read byte after peeking does match peeked byte; {0}; {1}")]
-    ReadByteAfterPeekingDoesMatchPeekedByte(ReadContext, WriteContext),
+    #[error("Read byte after peeking does match peeked byte; {0}")]
+    ReadByteAfterPeekingDoesMatchPeekedByte(ReadContext),
 
     /// Unrecognized first byte for new bencoded value.
     ///
     /// The main parser peeks one byte ahead to know what kind of bencoded value
     /// is being parsed. This error is raised when the peeked byte is not a
     /// valid first byte for a bencoded value.
-    #[error("Unrecognized first byte for new bencoded value; {0}; {1}")]
-    UnrecognizedFirstBencodeValueByte(ReadContext, WriteContext),
+    #[error("Unrecognized first byte for new bencoded value; {0}")]
+    UnrecognizedFirstBencodeValueByte(ReadContext),
 
     // Integers
     /// Unexpected byte parsing integer.

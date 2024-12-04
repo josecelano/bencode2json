@@ -4,9 +4,9 @@ pub mod string;
 
 use std::io::{self, Read};
 
-use super::error::{self, ReadContext, WriteContext};
+use super::error::{self, ReadContext};
 
-use crate::rw::{byte_reader::ByteReader, byte_writer::ByteWriter, writer::Writer};
+use crate::rw::{byte_reader::ByteReader, byte_writer::ByteWriter};
 
 /* TODO:
 
@@ -50,14 +50,11 @@ impl<R: Read> BencodeTokenizer<R> {
     /// Will return an error if:
     ///
     /// - It can't read from the input.
-    pub fn next_token<W: Writer>(
-        &mut self,
-        writer: &mut W,
-    ) -> Result<Option<BencodeToken>, error::Error> {
+    pub fn next_token(&mut self) -> Result<Option<BencodeToken>, error::Error> {
         let capture_output = Vec::new();
         let mut null_writer = ByteWriter::new(capture_output);
 
-        let opt_peeked_byte = Self::peek_byte(&mut self.byte_reader, &null_writer)?;
+        let opt_peeked_byte = Self::peek_byte(&mut self.byte_reader)?;
 
         match opt_peeked_byte {
             Some(peeked_byte) => {
@@ -71,37 +68,21 @@ impl<R: Read> BencodeTokenizer<R> {
                         Ok(Some(BencodeToken::String(value)))
                     }
                     BENCODE_BEGIN_LIST => {
-                        let _byte = Self::read_peeked_byte(
-                            peeked_byte,
-                            &mut self.byte_reader,
-                            &null_writer,
-                        )?;
+                        let _byte = Self::read_peeked_byte(peeked_byte, &mut self.byte_reader)?;
                         Ok(Some(BencodeToken::BeginList))
                     }
                     BENCODE_BEGIN_DICT => {
-                        let _byte = Self::read_peeked_byte(
-                            peeked_byte,
-                            &mut self.byte_reader,
-                            &null_writer,
-                        )?;
+                        let _byte = Self::read_peeked_byte(peeked_byte, &mut self.byte_reader)?;
                         Ok(Some(BencodeToken::BeginDict))
                     }
                     BENCODE_END_LIST_OR_DICT => {
-                        let _byte = Self::read_peeked_byte(
-                            peeked_byte,
-                            &mut self.byte_reader,
-                            &null_writer,
-                        )?;
+                        let _byte = Self::read_peeked_byte(peeked_byte, &mut self.byte_reader)?;
                         Ok(Some(BencodeToken::EndListOrDict))
                     }
                     b'\n' => {
                         // todo: we should not return any token and continue to the next token.
                         // Ignore line breaks at the beginning, the end, or between values
-                        let _byte = Self::read_peeked_byte(
-                            peeked_byte,
-                            &mut self.byte_reader,
-                            &null_writer,
-                        )?;
+                        let _byte = Self::read_peeked_byte(peeked_byte, &mut self.byte_reader)?;
                         Ok(Some(BencodeToken::LineBreak))
                     }
                     _ => Err(error::Error::UnrecognizedFirstBencodeValueByte(
@@ -109,11 +90,6 @@ impl<R: Read> BencodeTokenizer<R> {
                             byte: Some(peeked_byte),
                             pos: self.byte_reader.input_byte_counter(),
                             latest_bytes: self.byte_reader.captured_bytes(),
-                        },
-                        WriteContext {
-                            byte: Some(peeked_byte),
-                            pos: writer.output_byte_counter(),
-                            latest_bytes: writer.captured_bytes(),
                         },
                     )),
                 }
@@ -131,10 +107,9 @@ impl<R: Read> BencodeTokenizer<R> {
     ///
     /// - It can't read from the input.
     /// - The byte read is not the expected one (the previously peeked byte).
-    fn read_peeked_byte<W: Writer>(
+    fn read_peeked_byte(
         peeked_byte: u8,
         reader: &mut ByteReader<R>,
-        writer: &W,
     ) -> Result<Option<u8>, error::Error> {
         match reader.read_byte() {
             Ok(byte) => {
@@ -146,11 +121,6 @@ impl<R: Read> BencodeTokenizer<R> {
                         byte: Some(byte),
                         pos: reader.input_byte_counter(),
                         latest_bytes: reader.captured_bytes(),
-                    },
-                    WriteContext {
-                        byte: Some(byte),
-                        pos: writer.output_byte_counter(),
-                        latest_bytes: writer.captured_bytes(),
                     },
                 ))
             }
@@ -169,10 +139,7 @@ impl<R: Read> BencodeTokenizer<R> {
     /// # Errors
     ///
     /// Will return and errors if it can't read from the input.
-    fn peek_byte<W: Writer>(
-        reader: &mut ByteReader<R>,
-        _writer: &W,
-    ) -> Result<Option<u8>, error::Error> {
+    fn peek_byte(reader: &mut ByteReader<R>) -> Result<Option<u8>, error::Error> {
         match reader.peek_byte() {
             Ok(byte) => Ok(Some(byte)),
             Err(err) => {

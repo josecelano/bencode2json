@@ -8,11 +8,7 @@ use super::error::{self, ReadContext};
 
 use crate::rw::byte_reader::ByteReader;
 
-/* TODO:
-
-- Implement trait Iterator for tokenizer.
-
-*/
+// todo: Implement trait Iterator for tokenizer.
 
 // Bencoded reserved bytes
 const BENCODE_BEGIN_INTEGER: u8 = b'i';

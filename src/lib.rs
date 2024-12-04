@@ -40,7 +40,7 @@ pub mod rw;
 pub mod tokenizer;
 
 use error::Error;
-use generators::json::BencodeParser;
+use generators::json::Generator;
 mod test;
 
 /// It converts bencoded bytes into a JSON string.
@@ -51,7 +51,7 @@ mod test;
 pub fn try_bencode_to_json(input_buffer: &[u8]) -> Result<String, Error> {
     let mut output = String::new();
 
-    let mut parser = BencodeParser::new(input_buffer);
+    let mut parser = Generator::new(input_buffer);
 
     match parser.write_str(&mut output) {
         Ok(()) => Ok(output),

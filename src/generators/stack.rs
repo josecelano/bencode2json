@@ -1,5 +1,4 @@
-//! The stack used by the Bencoded to JSON converter to keep track of the
-//! current parsing state.
+//! The stack used by the generators to keep track of the current parsing state.
 use std::fmt::Display;
 
 /// Stack containing states for nested Bencoded values.

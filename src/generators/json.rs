@@ -1,9 +1,4 @@
-/* TODO:
-
-- Rename this parser to generator.
-
-*/
-
+//! Json generator for bencoded data.
 use core::str;
 use std::{
     fmt::Write as FmtWrite,
@@ -22,13 +17,13 @@ use crate::{
     tokenizer,
 };
 
-pub struct BencodeParser<R: Read> {
+pub struct Generator<R: Read> {
     tokenizer: Tokenizer<R>,
     num_processed_tokens: u64,
     stack: Stack,
 }
 
-impl<R: Read> BencodeParser<R> {
+impl<R: Read> Generator<R> {
     const JSON_ARRAY_BEGIN: u8 = b'[';
     const JSON_ARRAY_ITEMS_SEPARATOR: u8 = b',';
     const JSON_ARRAY_END: u8 = b']';
@@ -39,7 +34,7 @@ impl<R: Read> BencodeParser<R> {
     const JSON_OBJ_END: u8 = b'}';
 
     pub fn new(reader: R) -> Self {
-        BencodeParser {
+        Generator {
             tokenizer: Tokenizer::new(reader),
             num_processed_tokens: 1,
             stack: Stack::default(),
@@ -353,16 +348,16 @@ mod tests {
 
     use std::io::{self, Read};
 
-    use crate::generators::json::BencodeParser;
+    use crate::generators::json::Generator;
 
     mod it_should_allow_writing {
-        use crate::generators::json::BencodeParser;
+        use crate::generators::json::Generator;
 
         #[test]
         fn to_any_type_implementing_io_write_trait() {
             let mut output = Vec::new();
 
-            let mut parser = BencodeParser::new(&b"i0e"[..]);
+            let mut parser = Generator::new(&b"i0e"[..]);
 
             parser
                 .write_bytes(&mut output)
@@ -375,7 +370,7 @@ mod tests {
         fn writing_to_any_type_implementing_fmt_write_trait() {
             let mut output = String::new();
 
-            let mut parser = BencodeParser::new(&b"i0e"[..]);
+            let mut parser = Generator::new(&b"i0e"[..]);
 
             parser
                 .write_str(&mut output)
@@ -400,7 +395,7 @@ mod tests {
 
         let mut output = String::new();
 
-        let mut parser = BencodeParser::new(EmptyReader);
+        let mut parser = Generator::new(EmptyReader);
 
         parser.write_str(&mut output).unwrap();
 
@@ -409,13 +404,13 @@ mod tests {
 
     mod it_should_allow_special_bencode_cases {
 
-        use crate::{generators::json::BencodeParser, test::bencode_to_json_unchecked};
+        use crate::{generators::json::Generator, test::bencode_to_json_unchecked};
 
         #[test]
         fn an_empty_input() {
             let mut output = String::new();
 
-            let mut parser = BencodeParser::new(&b""[..]);
+            let mut parser = Generator::new(&b""[..]);
 
             parser
                 .write_str(&mut output)
@@ -446,7 +441,7 @@ mod tests {
     mod it_should_fail {
         use std::io::{self, Read};
 
-        use crate::{error::Error, generators::json::BencodeParser, try_bencode_to_json};
+        use crate::{error::Error, generators::json::Generator, try_bencode_to_json};
 
         #[test]
         fn when_there_is_a_problem_reading_from_input() {
@@ -463,7 +458,7 @@ mod tests {
 
             let mut output = String::new();
 
-            let mut parser = BencodeParser::new(FaultyReader);
+            let mut parser = Generator::new(FaultyReader);
 
             let result = parser.write_str(&mut output);
 

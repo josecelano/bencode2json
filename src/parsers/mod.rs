@@ -8,6 +8,14 @@ pub mod integer;
 pub mod stack;
 pub mod string;
 
+/* TODO:
+
+- Remove writer from tokenizer.
+- Implement trait Iterator for tokenizer.
+- Rename this parser to generator.
+
+*/
+
 use core::str;
 use std::{
     fmt::Write as FmtWrite,
@@ -47,111 +55,72 @@ pub enum BencodeToken {
     LineBreak,
 }
 
-pub struct BencodeParser<R: Read> {
+pub struct BencodeTokenizer<R: Read> {
     byte_reader: ByteReader<R>,
-    num_processed_tokens: u64,
-    stack: Stack,
 }
 
-impl<R: Read> BencodeParser<R> {
-    const JSON_ARRAY_BEGIN: u8 = b'[';
-    const JSON_ARRAY_ITEMS_SEPARATOR: u8 = b',';
-    const JSON_ARRAY_END: u8 = b']';
-
-    const JSON_OBJ_BEGIN: u8 = b'{';
-    const JSON_OBJ_FIELDS_SEPARATOR: u8 = b',';
-    const JSON_OBJ_FIELD_KEY_VALUE_SEPARATOR: u8 = b':';
-    const JSON_OBJ_END: u8 = b'}';
-
+impl<R: Read> BencodeTokenizer<R> {
     pub fn new(reader: R) -> Self {
-        BencodeParser {
+        BencodeTokenizer {
             byte_reader: ByteReader::new(reader),
-            num_processed_tokens: 1,
-            stack: Stack::default(),
         }
     }
 
-    /// It parses a bencoded value read from input and writes the corresponding
-    /// JSON UTF-8 string value to the output.
-    ///
-    /// # Errors
-    ///
-    /// Will return an error if it can't read from the input or write to the
-    /// output.
-    ///
-    /// # Panics
-    ///
-    /// Will panic if receives a byte that isn't a valid begin or end of a
-    /// bencoded type: integer, string, list or dictionary.
-    pub fn write_str<W: FmtWrite>(&mut self, writer: W) -> Result<(), error::Error> {
-        let mut writer = StringWriter::new(writer);
-        self.parse(&mut writer)
-    }
-
-    /// It parses a bencoded value read from input and writes the corresponding
-    /// JSON UTF-8 string value as bytes to the output.
-    ///
-    /// # Errors
-    ///
-    /// Will return an error if it can't read from the input or write to the
-    /// output.
-    ///
-    /// # Panics
-    ///
-    /// Will panic if receives a byte that isn't a valid begin or end of a
-    /// bencoded type: integer, string, list or dictionary.
-    pub fn write_bytes<W: IoWrite>(&mut self, writer: W) -> Result<(), error::Error> {
-        let mut writer = ByteWriter::new(writer);
-        self.parse(&mut writer)
-    }
-
-    /// It parses a bencoded value read from input and writes the corresponding
-    /// JSON value to the output.
-    ///
-    /// # Errors
-    ///
-    /// Will return an error if:
-    ///
-    /// - It can't read from the input or write to the output.
-    /// - The input is invalid Bencode.
-    fn parse<W: Writer>(&mut self, writer: &mut W) -> Result<(), error::Error> {
+    fn next_token<W: Writer>(
+        &mut self,
+        writer: &mut W,
+    ) -> Result<Option<BencodeToken>, error::Error> {
         let capture_output = Vec::new();
         let mut null_writer = ByteWriter::new(capture_output);
 
-        while let Some(peeked_byte) = Self::peek_byte(&mut self.byte_reader, &null_writer)? {
-            let token: BencodeToken = match peeked_byte {
-                BENCODE_BEGIN_INTEGER => {
-                    let value = integer::parse(&mut self.byte_reader, &mut null_writer)?;
-                    BencodeToken::Integer(value)
-                }
-                b'0'..=b'9' => {
-                    let value = string::parse(&mut self.byte_reader, &mut null_writer)?;
-                    BencodeToken::String(value)
-                }
-                BENCODE_BEGIN_LIST => {
-                    let _byte =
-                        Self::read_peeked_byte(peeked_byte, &mut self.byte_reader, &null_writer)?;
-                    BencodeToken::BeginList
-                }
-                BENCODE_BEGIN_DICT => {
-                    let _byte =
-                        Self::read_peeked_byte(peeked_byte, &mut self.byte_reader, &null_writer)?;
-                    BencodeToken::BeginDict
-                }
-                BENCODE_END_LIST_OR_DICT => {
-                    let _byte =
-                        Self::read_peeked_byte(peeked_byte, &mut self.byte_reader, &null_writer)?;
-                    BencodeToken::EndListOrDict
-                }
-                b'\n' => {
-                    // todo: we should not return any token and continue to the next token.
-                    // Ignore line breaks at the beginning, the end, or between values
-                    let _byte =
-                        Self::read_peeked_byte(peeked_byte, &mut self.byte_reader, &null_writer)?;
-                    BencodeToken::LineBreak
-                }
-                _ => {
-                    return Err(error::Error::UnrecognizedFirstBencodeValueByte(
+        let opt_peeked_byte = Self::peek_byte(&mut self.byte_reader, &null_writer)?;
+
+        match opt_peeked_byte {
+            Some(peeked_byte) => {
+                match peeked_byte {
+                    BENCODE_BEGIN_INTEGER => {
+                        let value = integer::parse(&mut self.byte_reader, &mut null_writer)?;
+                        Ok(Some(BencodeToken::Integer(value)))
+                    }
+                    b'0'..=b'9' => {
+                        let value = string::parse(&mut self.byte_reader, &mut null_writer)?;
+                        Ok(Some(BencodeToken::String(value)))
+                    }
+                    BENCODE_BEGIN_LIST => {
+                        let _byte = Self::read_peeked_byte(
+                            peeked_byte,
+                            &mut self.byte_reader,
+                            &null_writer,
+                        )?;
+                        Ok(Some(BencodeToken::BeginList))
+                    }
+                    BENCODE_BEGIN_DICT => {
+                        let _byte = Self::read_peeked_byte(
+                            peeked_byte,
+                            &mut self.byte_reader,
+                            &null_writer,
+                        )?;
+                        Ok(Some(BencodeToken::BeginDict))
+                    }
+                    BENCODE_END_LIST_OR_DICT => {
+                        let _byte = Self::read_peeked_byte(
+                            peeked_byte,
+                            &mut self.byte_reader,
+                            &null_writer,
+                        )?;
+                        Ok(Some(BencodeToken::EndListOrDict))
+                    }
+                    b'\n' => {
+                        // todo: we should not return any token and continue to the next token.
+                        // Ignore line breaks at the beginning, the end, or between values
+                        let _byte = Self::read_peeked_byte(
+                            peeked_byte,
+                            &mut self.byte_reader,
+                            &null_writer,
+                        )?;
+                        Ok(Some(BencodeToken::LineBreak))
+                    }
+                    _ => Err(error::Error::UnrecognizedFirstBencodeValueByte(
                         ReadContext {
                             byte: Some(peeked_byte),
                             pos: self.byte_reader.input_byte_counter(),
@@ -162,68 +131,11 @@ impl<R: Read> BencodeParser<R> {
                             pos: writer.output_byte_counter(),
                             latest_bytes: writer.captured_bytes(),
                         },
-                    ));
-                }
-            };
-
-            /* TODO:
-
-            - Extract tokenizer (without implementing the Iterator trait).
-            - Remove writer from tokenizer.
-            - Implement trait Iterator for tokenizer.
-            - Rename this parser to generator.
-
-            */
-
-            match token {
-                BencodeToken::Integer(integer_bytes) => {
-                    self.begin_bencoded_value(BencodeType::Integer, writer)?;
-                    // todo: add `write_bytes` to writer.
-                    for bytes in integer_bytes {
-                        writer.write_byte(bytes)?;
-                    }
-                }
-                BencodeToken::String(string_bytes) => {
-                    self.begin_bencoded_value(BencodeType::String, writer)?;
-
-                    let html_tag_style_string = match str::from_utf8(&string_bytes) {
-                        Ok(string) => {
-                            // String only contains valid UTF-8 chars -> print it as it's
-                            &format!("<string>{}</string>", string.to_owned())
-                        }
-                        Err(_) => {
-                            // String contains non valid UTF-8 chars -> print it as hex bytes
-                            &format!("<hex>{}</hex>", hex::encode(string_bytes))
-                        }
-                    };
-
-                    writer.write_str(
-                        &serde_json::to_string(&html_tag_style_string)
-                            .expect("Failed to serialize to JSON. This should not happen because non UTF-8 bencoded string are serialized as hex bytes"),
-                    )?;
-                }
-                BencodeToken::BeginList => {
-                    self.begin_bencoded_value(BencodeType::List, writer)?;
-                    writer.write_byte(Self::JSON_ARRAY_BEGIN)?;
-                    self.stack.push(State::ExpectingFirstListItemOrEnd);
-                }
-                BencodeToken::BeginDict => {
-                    self.begin_bencoded_value(BencodeType::Dict, writer)?;
-                    writer.write_byte(Self::JSON_OBJ_BEGIN)?;
-                    self.stack.push(State::ExpectingFirstDictFieldOrEnd);
-                }
-                BencodeToken::EndListOrDict => {
-                    self.end_list_or_dict(writer)?;
-                }
-                BencodeToken::LineBreak => {
-                    // Ignore line breaks at the beginning, the end, or between values
+                    )),
                 }
             }
-
-            self.num_processed_tokens += 1;
+            None => Ok(None),
         }
-
-        self.check_bad_end_stack_state(writer)
     }
 
     /// It reads the next byte from the input consuming it. It returns `None` if
@@ -288,6 +200,140 @@ impl<R: Read> BencodeParser<R> {
         }
     }
 
+    /// Returns the number of bytes that have been read from the input.
+    pub fn input_byte_counter(&self) -> u64 {
+        self.byte_reader.input_byte_counter()
+    }
+
+    /// Returns a copy of the bytes that have been read from the input.
+    pub fn captured_bytes(&self) -> Vec<u8> {
+        self.byte_reader.captured_bytes()
+    }
+}
+
+pub struct BencodeParser<R: Read> {
+    tokenizer: BencodeTokenizer<R>,
+    num_processed_tokens: u64,
+    stack: Stack,
+}
+
+impl<R: Read> BencodeParser<R> {
+    const JSON_ARRAY_BEGIN: u8 = b'[';
+    const JSON_ARRAY_ITEMS_SEPARATOR: u8 = b',';
+    const JSON_ARRAY_END: u8 = b']';
+
+    const JSON_OBJ_BEGIN: u8 = b'{';
+    const JSON_OBJ_FIELDS_SEPARATOR: u8 = b',';
+    const JSON_OBJ_FIELD_KEY_VALUE_SEPARATOR: u8 = b':';
+    const JSON_OBJ_END: u8 = b'}';
+
+    pub fn new(reader: R) -> Self {
+        BencodeParser {
+            tokenizer: BencodeTokenizer::new(reader),
+            num_processed_tokens: 1,
+            stack: Stack::default(),
+        }
+    }
+
+    /// It parses a bencoded value read from input and writes the corresponding
+    /// JSON UTF-8 string value to the output.
+    ///
+    /// # Errors
+    ///
+    /// Will return an error if it can't read from the input or write to the
+    /// output.
+    ///
+    /// # Panics
+    ///
+    /// Will panic if receives a byte that isn't a valid begin or end of a
+    /// bencoded type: integer, string, list or dictionary.
+    pub fn write_str<W: FmtWrite>(&mut self, writer: W) -> Result<(), error::Error> {
+        let mut writer = StringWriter::new(writer);
+        self.parse(&mut writer)
+    }
+
+    /// It parses a bencoded value read from input and writes the corresponding
+    /// JSON UTF-8 string value as bytes to the output.
+    ///
+    /// # Errors
+    ///
+    /// Will return an error if it can't read from the input or write to the
+    /// output.
+    ///
+    /// # Panics
+    ///
+    /// Will panic if receives a byte that isn't a valid begin or end of a
+    /// bencoded type: integer, string, list or dictionary.
+    pub fn write_bytes<W: IoWrite>(&mut self, writer: W) -> Result<(), error::Error> {
+        let mut writer = ByteWriter::new(writer);
+        self.parse(&mut writer)
+    }
+
+    /// It parses a bencoded value read from input and writes the corresponding
+    /// JSON value to the output.
+    ///
+    /// # Errors
+    ///
+    /// Will return an error if:
+    ///
+    /// - It can't read from the input or write to the output.
+    /// - The input is invalid Bencode.
+    fn parse<W: Writer>(&mut self, writer: &mut W) -> Result<(), error::Error> {
+        let capture_output = Vec::new();
+        let mut null_writer = ByteWriter::new(capture_output);
+
+        while let Some(token) = self.tokenizer.next_token(&mut null_writer)? {
+            match token {
+                BencodeToken::Integer(integer_bytes) => {
+                    self.begin_bencoded_value(BencodeType::Integer, writer)?;
+                    // todo: add `write_bytes` to writer.
+                    for bytes in integer_bytes {
+                        writer.write_byte(bytes)?;
+                    }
+                }
+                BencodeToken::String(string_bytes) => {
+                    self.begin_bencoded_value(BencodeType::String, writer)?;
+
+                    let html_tag_style_string = match str::from_utf8(&string_bytes) {
+                        Ok(string) => {
+                            // String only contains valid UTF-8 chars -> print it as it's
+                            &format!("<string>{}</string>", string.to_owned())
+                        }
+                        Err(_) => {
+                            // String contains non valid UTF-8 chars -> print it as hex bytes
+                            &format!("<hex>{}</hex>", hex::encode(string_bytes))
+                        }
+                    };
+
+                    writer.write_str(
+                        &serde_json::to_string(&html_tag_style_string)
+                            .expect("Failed to serialize to JSON. This should not happen because non UTF-8 bencoded string are serialized as hex bytes"),
+                    )?;
+                }
+                BencodeToken::BeginList => {
+                    self.begin_bencoded_value(BencodeType::List, writer)?;
+                    writer.write_byte(Self::JSON_ARRAY_BEGIN)?;
+                    self.stack.push(State::ExpectingFirstListItemOrEnd);
+                }
+                BencodeToken::BeginDict => {
+                    self.begin_bencoded_value(BencodeType::Dict, writer)?;
+                    writer.write_byte(Self::JSON_OBJ_BEGIN)?;
+                    self.stack.push(State::ExpectingFirstDictFieldOrEnd);
+                }
+                BencodeToken::EndListOrDict => {
+                    self.end_list_or_dict(writer)?;
+                }
+                BencodeToken::LineBreak => {
+                    // Ignore line breaks at the beginning, the end, or between values
+                }
+            }
+
+            self.num_processed_tokens += 1;
+        }
+
+        self.check_bad_end_stack_state(writer)
+    }
+
     /// It updates the stack state and prints the delimiters when needed.
     ///
     /// Called when the first byt of a bencoded value (integer, string, list or dict)
@@ -315,8 +361,8 @@ impl<R: Read> BencodeParser<R> {
                         bencode_type,
                         ReadContext {
                             byte: None,
-                            pos: self.byte_reader.input_byte_counter(),
-                            latest_bytes: self.byte_reader.captured_bytes(),
+                            pos: self.tokenizer.input_byte_counter(),
+                            latest_bytes: self.tokenizer.captured_bytes(),
                         },
                         WriteContext {
                             byte: None,
@@ -339,8 +385,8 @@ impl<R: Read> BencodeParser<R> {
                         bencode_type,
                         ReadContext {
                             byte: None,
-                            pos: self.byte_reader.input_byte_counter(),
-                            latest_bytes: self.byte_reader.captured_bytes(),
+                            pos: self.tokenizer.input_byte_counter(),
+                            latest_bytes: self.tokenizer.captured_bytes(),
                         },
                         WriteContext {
                             byte: None,
@@ -381,8 +427,8 @@ impl<R: Read> BencodeParser<R> {
                 return Err(error::Error::PrematureEndOfDict(
                     ReadContext {
                         byte: None,
-                        pos: self.byte_reader.input_byte_counter(),
-                        latest_bytes: self.byte_reader.captured_bytes(),
+                        pos: self.tokenizer.input_byte_counter(),
+                        latest_bytes: self.tokenizer.captured_bytes(),
                     },
                     WriteContext {
                         byte: None,
@@ -395,8 +441,8 @@ impl<R: Read> BencodeParser<R> {
                 return Err(error::Error::NoMatchingStartForListOrDictEnd(
                     ReadContext {
                         byte: None,
-                        pos: self.byte_reader.input_byte_counter(),
-                        latest_bytes: self.byte_reader.captured_bytes(),
+                        pos: self.tokenizer.input_byte_counter(),
+                        latest_bytes: self.tokenizer.captured_bytes(),
                     },
                     WriteContext {
                         byte: None,
@@ -424,8 +470,8 @@ impl<R: Read> BencodeParser<R> {
                 error::Error::UnexpectedEndOfInputExpectingFirstListItemOrEnd(
                     ReadContext {
                         byte: None,
-                        pos: self.byte_reader.input_byte_counter(),
-                        latest_bytes: self.byte_reader.captured_bytes(),
+                        pos: self.tokenizer.input_byte_counter(),
+                        latest_bytes: self.tokenizer.captured_bytes(),
                     },
                     WriteContext {
                         byte: None,
@@ -438,8 +484,8 @@ impl<R: Read> BencodeParser<R> {
                 Err(error::Error::UnexpectedEndOfInputExpectingNextListItem(
                     ReadContext {
                         byte: None,
-                        pos: self.byte_reader.input_byte_counter(),
-                        latest_bytes: self.byte_reader.captured_bytes(),
+                        pos: self.tokenizer.input_byte_counter(),
+                        latest_bytes: self.tokenizer.captured_bytes(),
                     },
                     WriteContext {
                         byte: None,
@@ -452,8 +498,8 @@ impl<R: Read> BencodeParser<R> {
                 error::Error::UnexpectedEndOfInputExpectingFirstDictFieldOrEnd(
                     ReadContext {
                         byte: None,
-                        pos: self.byte_reader.input_byte_counter(),
-                        latest_bytes: self.byte_reader.captured_bytes(),
+                        pos: self.tokenizer.input_byte_counter(),
+                        latest_bytes: self.tokenizer.captured_bytes(),
                     },
                     WriteContext {
                         byte: None,
@@ -466,8 +512,8 @@ impl<R: Read> BencodeParser<R> {
                 Err(error::Error::UnexpectedEndOfInputExpectingDictFieldValue(
                     ReadContext {
                         byte: None,
-                        pos: self.byte_reader.input_byte_counter(),
-                        latest_bytes: self.byte_reader.captured_bytes(),
+                        pos: self.tokenizer.input_byte_counter(),
+                        latest_bytes: self.tokenizer.captured_bytes(),
                     },
                     WriteContext {
                         byte: None,
@@ -480,8 +526,8 @@ impl<R: Read> BencodeParser<R> {
                 error::Error::UnexpectedEndOfInputExpectingDictFieldKeyOrEnd(
                     ReadContext {
                         byte: None,
-                        pos: self.byte_reader.input_byte_counter(),
-                        latest_bytes: self.byte_reader.captured_bytes(),
+                        pos: self.tokenizer.input_byte_counter(),
+                        latest_bytes: self.tokenizer.captured_bytes(),
                     },
                     WriteContext {
                         byte: None,

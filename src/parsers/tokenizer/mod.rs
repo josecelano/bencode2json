@@ -1,10 +1,10 @@
 //! Bencode tokenizer. Given an input stream, it returns a stream of tokens.
+pub mod integer;
+pub mod string;
+
 use std::io::{self, Read};
 
-use super::{
-    error::{self, ReadContext, WriteContext},
-    integer, string,
-};
+use super::error::{self, ReadContext, WriteContext};
 
 use crate::rw::{byte_reader::ByteReader, byte_writer::ByteWriter, writer::Writer};
 
